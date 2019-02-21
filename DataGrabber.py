@@ -13,9 +13,11 @@ import dateutil.parser
 
 class CsvDataGrabber:
 
-    def __init__(self):
-        self.CSV_PATH = "WeatherData/"
-        self.csv_file = None # placeholder value, probably very bad practice
+    def __init__(self, state):
+        self.state = state
+        self.CSV_PATH = "WeatherData/" + str(state)
+        self.file_is_active = False
+        self.csv_reader = csv.DictReader # placeholder value, probably very unsafe
 
     def __read_csv(self, csv_reader, input_month, input_day, input_hour):
         i = 0
@@ -65,73 +67,74 @@ class CsvDataGrabber:
         print("Time Elapsed:", end_time - start_time)
         print("Found Entries:")
 
+    def __initialize_csv(self):
+        csv_file = open(self.CSV_PATH)
+        return csv.DictReader(csv_file, delimiter=",")
+
     def close_file(self):
         self.csv_file.close()
 
-    def cycle_states(self, input_month, input_day, input_hour):
-        files = [f for f in listdir(self.CSV_PATH) if isfile(join(self.CSV_PATH, f))]
-        all_rows = []
+    def find_row_by_time(self, input_month, input_day, input_hour):
 
-        for state in files:
-            # this way the generator expression is saved
-            file_name = "WeatherData/" + state
-            self.csv_file = open(file_name)
-            csv_reader = csv.DictReader(self.csv_file, delimiter=",")
-
-            print()
-            print("-----------------------------")
-            print("Opened", state)
-
-            # find the rows for each date in this specified state
-            matching_rows = []
-            for row in self.__read_csv(csv_reader, input_month, input_day, input_hour):
-                matching_rows.append(row)
-
-            # remove any duplicate data from the same station within the 10 minute grace period
-            if len(matching_rows) > 5:
-                indexes_to_pop = [] # stores the list of indexes that we can remove
-
-                for i in range(0, len(matching_rows)-1):
-                    name_to_check = matching_rows[i]["STATION"]
-
-                    # loop over the sublist from name_to_check to see if any dupes are found
-                    for j in range(i+1, len(matching_rows)):
-                        if matching_rows[j]["STATION"] == name_to_check: # this means that the station has recorded another data entry within the 10 minute grace period
-                            date_to_check = dateutil.parser.parse(matching_rows[i]["DATE"])
-                            date_examined = dateutil.parser.parse(matching_rows[j]["DATE"])
-
-                            if date_to_check.time() < date_examined.time(): # examined time is closer to the hour, get rid of station[i]
-                                indexes_to_pop.append(i)
-                            else:
-                                indexes_to_pop.append(j)
-
-                # get rid of the duplicates
-                for pop_index in sorted(indexes_to_pop, reverse=True):
-                    matching_rows.pop(pop_index)
-
-            for sanitized_row in matching_rows:
-                print(sanitized_row["STATION_NAME"], row["DATE"])
-
-            print("-----------------------------")
-
-            all_rows = all_rows + matching_rows
-
-        return all_rows
+        if not self.file_is_active:
+            self.csv_reader = self.__initialize_csv()
+            self.file_is_active = True
 
 
+        # find the rows for each date in this specified state
+        matching_rows = []
+        for row in self.__read_csv(self.csv_reader, input_month, input_day, input_hour):
+            matching_rows.append(row)
 
-data_grabber = CsvDataGrabber()
+        # remove any duplicate data from the same station within the 10 minute grace period
+        if len(matching_rows) > 5:
+            indexes_to_pop = [] # stores the list of indexes that we can remove
 
-# date_to_find = (1, 1, 7)
-# data = data_grabber.cycle_states(*date_to_find)
+            for i in range(0, len(matching_rows)-1):
+                name_to_check = matching_rows[i]["STATION"]
 
-date_to_find = (1, 2, 21)
-data = data_grabber.cycle_states(*date_to_find)
+                # loop over the sublist from name_to_check to see if any dupes are found
+                for j in range(i+1, len(matching_rows)):
+                    if matching_rows[j]["STATION"] == name_to_check: # this means that the station has recorded another data entry within the 10 minute grace period
+                        date_to_check = dateutil.parser.parse(matching_rows[i]["DATE"])
+                        date_examined = dateutil.parser.parse(matching_rows[j]["DATE"])
 
-print("DONE DONE DONE DONE DONE")
+                        if date_to_check.time() < date_examined.time(): # examined time is closer to the hour, get rid of station[i]
+                            indexes_to_pop.append(i)
+                        else:
+                            indexes_to_pop.append(j)
 
-date_to_find = (1, 2, 22)
-data = data_grabber.cycle_states(*date_to_find)
+            # get rid of the duplicates
+            for pop_index in sorted(indexes_to_pop, reverse=True):
+                matching_rows.pop(pop_index)
+
+        for sanitized_row in matching_rows:
+            print(sanitized_row["STATION_NAME"], sanitized_row["DATE"])
+
+        print("-----------------------------")
+
+        return matching_rows
+
+
+files = [f for f in listdir("WeatherData/") if isfile(join("WeatherData/", f))]
+
+csv_states = []
+
+for state in files:
+    csv_states.append(CsvDataGrabber(state))
+
+date_to_find = (1, 1, 21)
+for data_grabber in csv_states:
+    print("Opened", data_grabber.state)
+    data_grabber.find_row_by_time(*date_to_find)
+
+print("DONE DONE DONE DONE")
+
+date_to_find = (1, 1, 23)
+for data_grabber in csv_states:
+    print("Opened", data_grabber.state)
+    data_grabber.find_row_by_time(*date_to_find)
+
 
 
 # for entry in data:
