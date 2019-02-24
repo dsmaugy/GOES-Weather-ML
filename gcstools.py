@@ -127,6 +127,7 @@ def plot_image(ncfilename, outfile, clat, clon):
     return None
 
 
+
 date = datetime(2018, 4, 21, 19)
 
 sat_file = get_objectId_at(date, product="ABI-L1b-RadC", channel="C12") # gets it at
