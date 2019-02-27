@@ -1,10 +1,20 @@
 from datetime import datetime
+import numpy as np
+from netCDF4 import Dataset
+import matplotlib.pyplot as plt
+import matplotlib, logging
+import logging
+import numpy as np
+from pyproj import Proj
+import pyresample as pr
+import os.path
+import logging
+import google.cloud.storage as gcs
 
 GOES_PUBLIC_BUCKET = "gcp-public-data-goes-16"
 
 
 def list_gcs(bucket, gcs_prefix, gcs_patterns):
-    import google.cloud.storage as gcs
     bucket = gcs.Client().get_bucket(bucket)
     blobs = bucket.list_blobs(prefix=gcs_prefix, delimiter='/')
     result = []
@@ -23,7 +33,6 @@ def list_gcs(bucket, gcs_prefix, gcs_patterns):
 
 
 def get_objectId_at(dt, product='ABI-L1b-RadF', channel='C14'):
-    import os, logging
     # get first 11-micron band (C14) at this hour
     # See: https://www.goes-r.gov/education/ABI-bands-quick-info.html
     logging.info('Looking for data collected on {}'.format(dt))
@@ -43,9 +52,6 @@ def get_objectId_at(dt, product='ABI-L1b-RadF', channel='C14'):
 
 
 def copy_fromgcs(bucket, objectId, name):
-    import os.path
-    import logging
-    import google.cloud.storage as gcs
     bucket = gcs.Client().get_bucket(bucket)
     blob = bucket.blob(objectId)
     basename = os.path.basename(objectId)
@@ -54,30 +60,19 @@ def copy_fromgcs(bucket, objectId, name):
     return name
 
 
-def crop_image(nc, data, clat, clon):
-   import logging
-   import numpy as np
-   from pyproj import Proj
-   import pyresample as pr
-
+def crop_image(nc, data, clat, clon, dqf=None):
    # output grid centered on clat, clon in equal-lat-lon
-   lats = np.arange(clat-10,clat+10,0.01) # approx 1km resolution, 2000km extent     0.5 for good zoom in
-   lons = np.arange(clon-10,clon+10,0.01) # approx 1km resolution, 2000km extent
+   lats = np.arange(clat-0.5,clat+0.5,0.01) # approx 1km resolution, 2000km extent     0.5 for good zoom in
+   lons = np.arange(clon-0.5,clon+0.5,0.01) # approx 1km resolution, 2000km extent
 
    lons, lats = np.meshgrid(lons, lats)
    new_grid = pr.geometry.GridDefinition(lons=lons, lats=lats)
-
-   print("Data: ", data)
-   print("New Grid: ", new_grid)
 
    # Subsatellite_Longitude is where the GEO satellite is
    lon_0 = nc.variables['nominal_satellite_subpoint_lon'][0]
    ht_0 = nc.variables['nominal_satellite_height'][0] * 1000 # meters
    x = nc.variables['x'][:] * ht_0 #/ 1000.0
    y = nc.variables['y'][:] * ht_0 #/ 1000.0
-
-   print("X: ", x)
-   print("Y: ", y)
 
    nx = len(x)
    ny = len(y)
@@ -91,16 +86,16 @@ def crop_image(nc, data, clat, clon):
 
    # now do remapping
    logging.info('Remapping from {}'.format(old_grid))
-   return pr.kd_tree.resample_nearest(old_grid, data, new_grid, radius_of_influence=50000)
+
+   if dqf is not None:
+       return pr.kd_tree.resample_nearest(old_grid, data, new_grid, radius_of_influence=50000), pr.kd_tree.resample_nearest(old_grid, dqf, new_grid, radius_of_influence=50000)
+   else:
+       return pr.kd_tree.resample_nearest(old_grid, data, new_grid, radius_of_influence=50000)
 
 
 
 def plot_image(ncfilename, outfile, clat, clon):
-    import matplotlib, logging
     matplotlib.use('Agg')  # headless display
-    import numpy as np
-    from netCDF4 import Dataset
-    import matplotlib.pyplot as plt
 
     with Dataset(ncfilename, 'r') as nc:
         rad = nc.variables['Rad'][:]
@@ -114,7 +109,6 @@ def plot_image(ncfilename, outfile, clat, clon):
 
         ref = np.flipud(ref)
 
-        print("Ref: ", ref)
         # do gamma correction to stretch the values
         # ref = np.sqrt(ref)
 
@@ -127,19 +121,19 @@ def plot_image(ncfilename, outfile, clat, clon):
     return None
 
 
+if __name__ == "__main__":
 
-date = datetime(2018, 4, 21, 19)
+    date = datetime(2018, 4, 21, 19)
 
-sat_file = get_objectId_at(date, product="ABI-L1b-RadC", channel="C12") # gets it at
+    # sat_file = get_objectId_at(date, product="ABI-L1b-RadC", channel="C12") # gets it at
 
-print(sat_file)
+    # print(sat_file)
 
-# copy_fromgcs(GOES_PUBLIC_BUCKET, sat_file, "TestSatFiles/RadC-C12-4-21-19-BOFLY.nc")
+    # copy_fromgcs(GOES_PUBLIC_BUCKET, sat_file, "TestSatFiles/RadC-C12-4-21-19-BOFLY.nc")
 
-# plot_image("TestSatFiles/RadC-C12-4-21-19-BOFLY.nc", "RadC-C12-4-21-19-TAMPA-SUMMMER.png", 27.9506, -82.4572) # 42.3601 -71.0589 for boston
+    # plot_image("SatFiles/SatFile-C01", "testing_bad_data.png", 27.9506, -82.4572) # 42.3601 -71.0589 for boston
 
-
-# copy_fromgcs(GOES_PUBLIC_BUCKET, get_objectId_at(datetime.today(), product="ABI-L2-CMIPC", channel=""), "TestSatFiles")
+    # copy_fromgcs(GOES_PUBLIC_BUCKET, get_objectId_at(datetime.today(), product="ABI-L2-CMIPC", channel=""), "TestSatFiles")
 
 # TODO: find out what channel to use for clouds
 # TODO: it starts at the beginning of the hour

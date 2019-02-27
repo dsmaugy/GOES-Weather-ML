@@ -5,9 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="02cf5325-2bb3-446a-a662-5bfec6377796" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/DataGrabber.py" beforeDir="false" afterPath="$PROJECT_DIR$/datagrabber.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/gcstools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/datagrabber.py" beforeDir="false" afterPath="$PROJECT_DIR$/datagrabber.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gcstools.py" beforeDir="false" afterPath="$PROJECT_DIR$/gcstools.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,8 +21,11 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gcstools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1980">
-              <caret line="132" column="33" selection-start-line="132" selection-start-column="33" selection-end-line="132" selection-end-column="55" />
+            <state relative-caret-position="1740">
+              <caret line="116" column="40" selection-start-line="116" selection-start-column="40" selection-end-line="116" selection-end-column="40" />
+              <folding>
+                <element signature="e#0#29#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -29,8 +33,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/datagrabber.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="12" column="52" selection-start-line="12" selection-start-column="52" selection-end-line="12" selection-end-column="52" />
+            <state relative-caret-position="186">
+              <caret line="236" column="16" selection-start-line="236" selection-start-column="16" selection-end-line="236" selection-end-column="16" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -60,7 +64,6 @@
       <find>south</find>
       <find>southdakota</find>
       <find>data_grabber</find>
-      <find>kansas</find>
       <find>hio</find>
       <find>massachusetts</find>
       <find>newmexico</find>
@@ -68,6 +71,13 @@
       <find>find_row_by_time</find>
       <find>new</find>
       <find>mass</find>
+      <find>kansas</find>
+      <find>kansas.csv</find>
+      <find>california</find>
+      <find>-----------------------------</find>
+      <find>wyoming</find>
+      <find>yellowstone</find>
+      <find>Ref</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -80,18 +90,18 @@
         <option value="$PROJECT_DIR$/CSVTest.py" />
         <option value="$PROJECT_DIR$/PickleTest.py" />
         <option value="$PROJECT_DIR$/Labels.py" />
-        <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/DataGrabber.py" />
         <option value="$PROJECT_DIR$/test.py" />
-        <option value="$PROJECT_DIR$/gcstools.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/datagrabber.py" />
+        <option value="$PROJECT_DIR$/gcstools.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
     <option name="y" value="-1" />
-    <option name="width" value="959" />
-    <option name="height" value="1053" />
+    <option name="width" value="960" />
+    <option name="height" value="1054" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -110,6 +120,11 @@
               <item name="GOES-Weather-ML" type="b2602c69:ProjectViewProjectNode" />
               <item name="GOES-Weather-ML" type="462c0819:PsiDirectoryNode" />
               <item name="config" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="GOES-Weather-ML" type="b2602c69:ProjectViewProjectNode" />
+              <item name="GOES-Weather-ML" type="462c0819:PsiDirectoryNode" />
+              <item name="SatFiles" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -132,8 +147,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.CSV Test">
-    <configuration name="CSV Test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+  <component name="RunManager" selected="Python.Data Grab Test">
+    <configuration name="Data Grab Test" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="GOES-Weather-ML" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -154,28 +169,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="PickleTest" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <module name="GOES-Weather-ML" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/PickleTest.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="GCS Test" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <module name="GOES-Weather-ML" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -196,11 +190,14 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <list>
+      <item itemvalue="Python.Data Grab Test" />
+      <item itemvalue="Python.GCS Test" />
+    </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.CSV Test" />
-        <item itemvalue="Python.PickleTest" />
-        <item itemvalue="Python.test" />
+        <item itemvalue="Python.Data Grab Test" />
+        <item itemvalue="Python.GCS Test" />
       </list>
     </recent_temporary>
   </component>
@@ -229,25 +226,33 @@
       <option name="project" value="LOCAL" />
       <updated>1550727978743</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="significantly increased speed by storing timezone data into dictionary, finally fixed time stuff and added support for daylight savings">
+      <created>1550977534454</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1550977534454</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-1" width="1920" height="1054" extended-state="7" />
+    <frame x="0" y="-1" width="1920" height="1054" extended-state="6" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12335266" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32975295" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.29967776" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.49973643" visible="true" weight="0.29967776" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.39957035" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Terminal" order="8" />
-      <window_info anchor="bottom" id="Event Log" order="9" side_tool="true" />
+      <window_info anchor="bottom" id="Event Log" order="9" sideWeight="0.5002636" side_tool="true" weight="0.29967776" />
       <window_info anchor="bottom" id="Python Console" order="10" weight="0.32903227" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -257,24 +262,20 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Commit before first day of data is due&#10;I can grab weather and satellite data from a specific time stamps now. However the weather data grabbing algorithm needs to be optimized with the CSV files&#10;&#10;Once that works, I just need to integrate the two data acquisition methods to give me a series of data that is feedable to the NN. Then feature testing of the NN can begin" />
     <MESSAGE value="Data grabbing is now optimized, iterator will &quot;remember&quot; where it left off and will not have to loop from the start again" />
-    <option name="LAST_COMMIT_MESSAGE" value="Data grabbing is now optimized, iterator will &quot;remember&quot; where it left off and will not have to loop from the start again" />
+    <MESSAGE value="significantly increased speed by storing timezone data into dictionary, finally fixed time stuff and added support for daylight savings" />
+    <option name="LAST_COMMIT_MESSAGE" value="significantly increased speed by storing timezone data into dictionary, finally fixed time stuff and added support for daylight savings" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/gcstools.py</url>
-          <line>93</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/gcstools.py</url>
-          <line>118</line>
+          <line>112</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/datagrabber.py</url>
-          <line>126</line>
+          <line>132</line>
           <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>
@@ -301,13 +302,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/lib/python3.5/datetime.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="199">
-          <caret line="1451" column="8" selection-start-line="1451" selection-start-column="8" selection-end-line="1451" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/WeatherData/southdakota.csv">
       <provider selected="true" editor-type-id="LargeFileEditor" />
     </entry>
@@ -327,20 +321,6 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Labels.py" />
     <entry file="file://$PROJECT_DIR$/PickleTest.py" />
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="120">
-          <caret line="8" column="12" lean-forward="true" selection-start-line="8" selection-start-column="12" selection-end-line="8" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gcstools.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1980">
-          <caret line="132" column="33" selection-start-line="132" selection-start-column="33" selection-end-line="132" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.local/lib/python3.5/site-packages/pytz/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1260">
@@ -355,10 +335,54 @@
         </state>
       </provider>
     </entry>
+    <entry file="file:///usr/lib/python3.5/datetime.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="290">
+          <caret line="675" column="43" lean-forward="true" selection-start-line="675" selection-start-column="43" selection-end-line="675" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/RadC-C12-4-21-19-TAMPA-SUMMMER-ZOOM.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharmCE2018.3/system/python_stubs/-2066100795/netCDF4/_netCDF4.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="8893">
+          <caret line="2110" column="8" selection-start-line="2110" selection-start-column="8" selection-end-line="2110" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="150">
+          <caret line="10" column="9" selection-start-line="10" selection-start-column="9" selection-end-line="10" selection-end-column="9" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/testing_bad_data.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file:///usr/local/lib/python3.5/dist-packages/pyproj/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1693">
+          <caret line="400" selection-start-line="400" selection-end-line="400" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/gcstools.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1740">
+          <caret line="116" column="40" selection-start-line="116" selection-start-column="40" selection-end-line="116" selection-end-column="40" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/datagrabber.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="12" column="52" selection-start-line="12" selection-start-column="52" selection-end-line="12" selection-end-column="52" />
+        <state relative-caret-position="186">
+          <caret line="236" column="16" selection-start-line="236" selection-start-column="16" selection-end-line="236" selection-end-column="16" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>

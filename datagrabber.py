@@ -6,11 +6,15 @@ import time
 import timezonefinder
 import pytz
 import dateutil.parser
+import numpy as np
+import gcstools
+import matplotlib.pyplot as plt
 
+NO_DOWNLOAD_MODE = True
 
 class CsvDataGrabber:
 
-    def __init__(self, state, starting_date=(2017, 7, 10, 0)):
+    def __init__(self, state, starting_date=(2017, 8, 1, 1)):
         self.__state = state
         self.__CSV_PATH = "WeatherData/" + str(state)
         self.__file_is_active = False
@@ -53,16 +57,18 @@ class CsvDataGrabber:
             hour = row_date.utctimetuple().tm_hour
             minute = row_date.utctimetuple().tm_min
 
-            one_hour_ahead_check = row_date + timedelta(hours=1)
-
             if year == input_year:
                 if month == input_month:
                     if day == input_day:
                         if hour == input_hour and minute == 0:
-                            yield row
-                        elif one_hour_ahead_check.utctimetuple().tm_hour == input_hour:
-                            if minute > 50:
+
+                            if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0:
                                 yield row
+                        elif hour + 1 == input_hour:
+                            if minute > 50:
+
+                                if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0:
+                                    yield row
 
                         elif hour >= input_hour:
                             # print("-------------------------------------------")
@@ -138,46 +144,113 @@ class CsvDataGrabber:
     def find_row_by_set_time(self):
         return self.find_row_by_time(*self.__current_date)
 
+    def update_time(self, new_date):
+        self.__current_date = new_date
+
+class RadianceDataGrabber:
+
+    def __init__(self, time_to_grab):
+        self.time = time_to_grab
+
     def find_rad_by_set_time(self, channel):
-        import gcstools
-        current_datetime = datetime(year=self.__current_date[0], month=self.__current_date[1], day=self.__current_date[2],
-                                    hour=self.__current_date[3])
+        if not NO_DOWNLOAD_MODE:
+            ncs_file_id = gcstools.get_objectId_at(self.time, product="ABI-L1b-RadC", channel=channel)
+            rad_file = gcstools.copy_fromgcs(gcstools.GOES_PUBLIC_BUCKET, ncs_file_id, "SatFiles/SatFile-" + channel)
+            print("Downloaded", rad_file)
 
-        ncs_file_id = gcstools.get_objectId_at(current_datetime, product="ABI-L1b-RadC", channel=channel)
-        gcstools.copy_fromgcs(gcstools.GOES_PUBLIC_BUCKET, ncs_file_id, "SatFile-" + channel)
+            return rad_file
+        else:
+            rad_file = "SatFiles/SatFile-" + channel
+            print("Found", rad_file)
+            return rad_file
 
 
-    # adds 1 hour to the date
-    def increment_date(self):
-        current_datetime = datetime(year=self.__current_date[0], month=self.__current_date[1], day=self.__current_date[2],
-                                    hour=self.__current_date[3])
-        current_datetime = current_datetime + timedelta(hours=1)
+class DataManager:
 
-        self.__current_date = (current_datetime.year, current_datetime.month, current_datetime.day, current_datetime.hour)
+    def __init__(self, starting_date=(2017, 8, 1, 1), channels=("C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16")):
+        self.__csv_states = []
+        self.__current_date = datetime(year=starting_date[0], month=starting_date[1], day=starting_date[2], hour=starting_date[3])
+        self.__channels = channels
 
-    @staticmethod
-    def get_all_states():
+    def load_all_states(self):
         files = [f for f in listdir("WeatherData/") if isfile(join("WeatherData/", f))]
-        csv_states = []
 
         for state in files:
-            csv_states.append(CsvDataGrabber(state))
+            self.__csv_states.append(CsvDataGrabber(state))
 
-        return csv_states
+        return self.__csv_states
+
+    def get_formatted_data(self):
+        from netCDF4 import Dataset
+        import gcstools
+
+        rad_retriever = RadianceDataGrabber(self.__current_date)
+        channel_files = []
+
+        # get all the channels we're going to be using
+        for channel in self.__channels:
+            rad_file = rad_retriever.find_rad_by_set_time(channel)
+            channel_files.append(rad_file)
+
+        # loops through every STATE in the same TIME
+        for s in self.__csv_states:
+            # update the time to check in all of the CsvDataGrabbers
+            s.update_time((self.__current_date.year, self.__current_date.month, self.__current_date.day, self.__current_date.hour))
+            station_entries = s.find_row_by_set_time()
+
+            # loops through every STATION in the SAME STATE
+            for entry in station_entries:
+                valid_data = True
+
+                station_rad_data = []
+                station_weather_data = []
+
+                # loops through every CHANNEL in the SAME STATION
+                for file in channel_files:
+
+                    channel_rad_data = []
+                    with Dataset(file) as nc:
+                        rad = nc.variables["Rad"][:]
+                        dqf = nc.variables["DQF"][:]
+
+                        rad, dqf = gcstools.crop_image(nc, rad, clat=float(entry["LATITUDE"]), clon=float(entry["LONGITUDE"]), dqf=dqf)
+
+                        # make sure that at least 95% of the pixels are good
+                        bad_vals_count = np.count_nonzero(dqf > 0)
+                        if bad_vals_count > 500:
+                            valid_data = False
+                            break
+
+                        channel_rad_data.append(rad)
+
+                if not valid_data:
+                    continue
 
 
-states = CsvDataGrabber.get_all_states()
+                # temp label is array of size 201 where -70 degrees F is index 0 and 130 degrees F is index 200, corresponding temp is marked with 1
+                temperature_label = np.zeros(201)
+                actual_temp = int(entry["HOURLYDRYBULBTEMPF"])
+                temp_index = actual_temp + 70
+                temperature_label[temp_index] = 1
 
-for s in states:
-    s.find_row_by_set_time()
-    s.increment_date()
+                sky_condition = entry["HOURLYSKYCONDITIONS"]
 
-for s in states:
-    s.find_row_by_set_time()
-    s.increment_date()
 
-for s in states:
-    s.find_row_by_set_time()
-    s.increment_date()
+
+    def increment_date(self):
+        self.__current_date = self.__current_date + timedelta(hours=1)
+
+    def get_all_states(self):
+        return self.__csv_states
+
+if __name__ == "__main__":
+    data_retriever = DataManager(starting_date=(2017, 8, 4, 5), channels=["C07"])
+
+    data_retriever.load_all_states()
+
+    data_retriever.get_formatted_data()
+
+# ("C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16")
+
 
 # TODO Use drybulb temp
