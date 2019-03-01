@@ -2,6 +2,7 @@ import csv
 from os import listdir
 from os.path import isfile, join
 from datetime import timedelta, datetime
+from netCDF4 import Dataset
 import time
 import timezonefinder
 import pytz
@@ -10,10 +11,13 @@ import numpy as np
 import gcstools
 import matplotlib.pyplot as plt
 
-NO_DOWNLOAD_MODE = True
+NO_DOWNLOAD_MODE = False
+
 
 class CsvDataGrabber:
 
+    # initialize a data grabber object
+    # state is the file name
     def __init__(self, state, starting_date=(2017, 8, 1, 1)):
         self.__state = state
         self.__CSV_PATH = "WeatherData/" + str(state)
@@ -49,13 +53,15 @@ class CsvDataGrabber:
 
             # remove effects of DST
             if row_date.dst().seconds > 0:
-                row_date = row_date + timedelta(seconds=row_date.dst().seconds)
+                updated_row_date = row_date + timedelta(seconds=row_date.dst().seconds)
+            else:
+                updated_row_date = row_date # dumb utctimetuple doesn't update if we just replace row_date
 
-            year = row_date.utctimetuple().tm_year
-            month = row_date.utctimetuple().tm_mon
-            day = row_date.utctimetuple().tm_mday
-            hour = row_date.utctimetuple().tm_hour
-            minute = row_date.utctimetuple().tm_min
+            year = updated_row_date.utctimetuple().tm_year
+            month = updated_row_date.utctimetuple().tm_mon
+            day = updated_row_date.utctimetuple().tm_mday
+            hour = updated_row_date.utctimetuple().tm_hour
+            minute = updated_row_date.utctimetuple().tm_min
 
             if year == input_year:
                 if month == input_month:
@@ -71,11 +77,16 @@ class CsvDataGrabber:
                                     yield row
 
                         elif hour >= input_hour:
-                            # print("-------------------------------------------")
-                            # print("- No more data found for given time stamp -")
-                            # print("-------------------------------------------")
-                            # print()
                             break
+
+
+                    # same as the code block above but special case when we looking at hour == 0
+                    elif day + 1 == input_day:
+                        if input_hour == 0:
+                            if hour == 23:
+                                if minute > 50:
+                                    if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0:
+                                        yield row
 
 
 
@@ -113,6 +124,8 @@ class CsvDataGrabber:
         if len(matching_rows) > 5:
             indexes_to_pop = []  # stores the list of indexes that we can remove
 
+
+
             for i in range(0, len(matching_rows) - 1):
                 name_to_check = matching_rows[i]["STATION"]
 
@@ -128,7 +141,7 @@ class CsvDataGrabber:
                         else:
                             if j not in indexes_to_pop:
                                 indexes_to_pop.append(j)
-
+            datetime
             # get rid of the duplicates
             for pop_index in sorted(indexes_to_pop, reverse=True):
                 # if pop_index < len(matching_rows): # bruh
@@ -137,7 +150,6 @@ class CsvDataGrabber:
         for sanitized_row in matching_rows:
             print(sanitized_row["STATION_NAME"], sanitized_row["DATE"])
 
-        print("-----------------------------")
 
         return matching_rows
 
@@ -146,6 +158,7 @@ class CsvDataGrabber:
 
     def update_time(self, new_date):
         self.__current_date = new_date
+
 
 class RadianceDataGrabber:
 
@@ -172,7 +185,9 @@ class DataManager:
         self.__current_date = datetime(year=starting_date[0], month=starting_date[1], day=starting_date[2], hour=starting_date[3])
         self.__channels = channels
 
-    def load_all_states(self):
+        self.__load_all_states()
+
+    def __load_all_states(self):
         files = [f for f in listdir("WeatherData/") if isfile(join("WeatherData/", f))]
 
         for state in files:
@@ -180,14 +195,15 @@ class DataManager:
 
         return self.__csv_states
 
+    # returns unpadded arrays
     def get_formatted_data(self):
-        from netCDF4 import Dataset
-        import gcstools
+        # these lists hold our respective radiance and weather data for this time iteration
+        radiance_feature_input = []
+        weather_label_output = []
 
+        # get all the radiance channels we're going to be using
         rad_retriever = RadianceDataGrabber(self.__current_date)
         channel_files = []
-
-        # get all the channels we're going to be using
         for channel in self.__channels:
             rad_file = rad_retriever.find_rad_by_set_time(channel)
             channel_files.append(rad_file)
@@ -198,17 +214,22 @@ class DataManager:
             s.update_time((self.__current_date.year, self.__current_date.month, self.__current_date.day, self.__current_date.hour))
             station_entries = s.find_row_by_set_time()
 
+            if len(station_entries) == 0:
+                print("Empty Dataset, skipping this set time")
+                continue
+
+            state_start_time = time.time()
+
             # loops through every STATION in the SAME STATE
             for entry in station_entries:
                 valid_data = True
 
-                station_rad_data = []
-                station_weather_data = []
+                channel_rad_data = []
 
                 # loops through every CHANNEL in the SAME STATION
                 for file in channel_files:
+                    print("Getting Radiance Channel " + file + " from " + entry["STATION_NAME"] + "...", end="")
 
-                    channel_rad_data = []
                     with Dataset(file) as nc:
                         rad = nc.variables["Rad"][:]
                         dqf = nc.variables["DQF"][:]
@@ -223,18 +244,78 @@ class DataManager:
 
                         channel_rad_data.append(rad)
 
+                        print("Done")
+
                 if not valid_data:
                     continue
 
-
+                print("Getting Weather Values from " + entry["STATION_NAME"] + "...", end="")
                 # temp label is array of size 201 where -70 degrees F is index 0 and 130 degrees F is index 200, corresponding temp is marked with 1
                 temperature_label = np.zeros(201)
                 actual_temp = int(entry["HOURLYDRYBULBTEMPF"])
                 temp_index = actual_temp + 70
                 temperature_label[temp_index] = 1
 
+                filtered_sky_conditions = []
                 sky_condition = entry["HOURLYSKYCONDITIONS"]
+                for word in sky_condition.split():
+                    if "CLR" in word:
+                        filtered_sky_conditions.append("CLR")
+                    elif "FEW" in word:
+                        filtered_sky_conditions.append("FEW")
+                    elif "SCT" in word:
+                        filtered_sky_conditions.append("SCT")
+                    elif "BKN" in word:
+                        filtered_sky_conditions.append("BKN")
+                    elif "OVC" in word:
+                        filtered_sky_conditions.append("OVC")
+                    elif "VV" in word:
+                        filtered_sky_conditions.append("VV")
 
+                # sky label is of size 6 where each index corresponds to the cloud conditions below
+                sky_condition_label = np.zeros(6)
+                sky_condition_to_check = filtered_sky_conditions[-1]
+
+                if sky_condition_to_check == "CLR":         # clear
+                    sky_condition_label[0] = 1
+                elif sky_condition_to_check == "FEW":       # few clouds
+                    sky_condition_label[1] = 1
+                elif sky_condition_to_check == "SCT":       # scattered clouds
+                    sky_condition_label[2] = 1
+                elif sky_condition_to_check == "BKN":       # broken clouds
+                    sky_condition_label[3] = 1
+                elif sky_condition_to_check == "OVC":       # overcast
+                    sky_condition_label[4] = 1
+                elif sky_condition_to_check == "VV":        # obscured sky
+                    sky_condition_label[5] = 1
+
+                # weather condition label is of size 4 where each index corresponds to the weather condition below
+                # note: more than 1 condition can be present
+                weather_condition_label = np.zeros(4)
+                weather_conditions = entry["HOURLYPRSENTWEATHERTYPE"]
+                if "DZ" in weather_conditions or "RA" in weather_conditions or "SH" in weather_conditions:  # rain
+                    weather_condition_label[0] = 1
+                if "SN" in weather_conditions:  # snow
+                    weather_condition_label[1] = 1
+                if "BR" in weather_conditions or "FG" in weather_conditions or "HZ" in weather_conditions:  # fog / mist
+                    weather_condition_label[2] = 1
+                if "TS" in weather_conditions:  # thunderstorms
+                    weather_condition_label[3] = 1
+
+                # this list represents all the weather labels for just ONE station
+                total_weather_labels = [temperature_label, sky_condition_label, weather_condition_label]
+
+                radiance_feature_input.append(channel_rad_data)
+                weather_label_output.append(total_weather_labels)
+
+                print("Done")
+
+            state_end_time = time.time()
+
+            print("Time Elapsed for Data Grabbing:", state_end_time - state_start_time)
+            print("-----------------------------")
+
+        return radiance_feature_input, weather_label_output
 
 
     def increment_date(self):
@@ -243,14 +324,26 @@ class DataManager:
     def get_all_states(self):
         return self.__csv_states
 
+    def get_current_date(self):
+        return self.__current_date
+
+
 if __name__ == "__main__":
-    data_retriever = DataManager(starting_date=(2017, 8, 4, 5), channels=["C07"])
+    data_date = (2017, 8, 1, 0)
+    data_retriever = DataManager(starting_date=data_date, channels=["C13", "C14", "C15", "C16"])
 
-    data_retriever.load_all_states()
+    while data_date[0] is not 2018:
+        radiance_features, weather_labels = data_retriever.get_formatted_data()
 
-    data_retriever.get_formatted_data()
+        radiance_features_nparray = np.array(radiance_features)
+        weather_labels_nparray = np.array(weather_labels)
 
-# ("C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16")
+        save_path = str.format("NumpyDataFiles/{0}-{1}-{2}-{3}", *data_date)
 
+        np.save(save_path + "rad_feature", radiance_features_nparray)
+        np.save(save_path + "weather_label", weather_labels_nparray)
 
-# TODO Use drybulb temp
+        data_retriever.increment_date()
+        data_date = data_retriever.get_current_date()
+
+# ["C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16"]
