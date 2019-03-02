@@ -11,7 +11,7 @@ import numpy as np
 import gcstools
 import matplotlib.pyplot as plt
 
-NO_DOWNLOAD_MODE = False
+NO_DOWNLOAD_MODE = True
 
 
 class CsvDataGrabber:
@@ -344,6 +344,7 @@ if __name__ == "__main__":
         np.save(save_path + "weather_label", weather_labels_nparray)
 
         data_retriever.increment_date()
-        data_date = data_retriever.get_current_date()
+        data_datetime = data_retriever.get_current_date()
+        data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
 
 # ["C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16"]
