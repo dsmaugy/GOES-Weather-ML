@@ -345,8 +345,8 @@ if __name__ == "__main__":
 
         save_path = str.format("NumpyDataFiles/{0}-{1}-{2}-{3}", *data_date)
 
-        np.save(save_path + "rad_feature", radiance_features_nparray)
-        np.save(save_path + "weather_label", weather_labels_nparray)
+        np.save(save_path + "-rad_feature", radiance_features_nparray)
+        np.save(save_path + "-weather_label", weather_labels_nparray)
 
         data_retriever.increment_date()
         data_datetime = data_retriever.get_current_date()
