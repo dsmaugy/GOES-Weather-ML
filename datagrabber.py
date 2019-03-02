@@ -11,7 +11,7 @@ import numpy as np
 import gcstools
 import matplotlib.pyplot as plt
 
-NO_DOWNLOAD_MODE = True
+NO_DOWNLOAD_MODE = False
 
 
 class CsvDataGrabber:
@@ -167,11 +167,16 @@ class RadianceDataGrabber:
 
     def find_rad_by_set_time(self, channel):
         if not NO_DOWNLOAD_MODE:
-            ncs_file_id = gcstools.get_objectId_at(self.time, product="ABI-L1b-RadC", channel=channel)
-            rad_file = gcstools.copy_fromgcs(gcstools.GOES_PUBLIC_BUCKET, ncs_file_id, "SatFiles/SatFile-" + channel)
-            print("Downloaded", rad_file)
 
-            return rad_file
+            try:
+                ncs_file_id = gcstools.get_objectId_at(self.time, product="ABI-L1b-RadC", channel=channel)
+                rad_file = gcstools.copy_fromgcs(gcstools.GOES_PUBLIC_BUCKET, ncs_file_id, "SatFiles/SatFile-" + channel)
+                print("Downloaded", rad_file)
+
+            except:
+                return None
+            else:
+                return rad_file
         else:
             rad_file = "SatFiles/SatFile-" + channel
             print("Found", rad_file)
@@ -185,6 +190,7 @@ class DataManager:
         self.__current_date = datetime(year=starting_date[0], month=starting_date[1], day=starting_date[2], hour=starting_date[3])
         self.__channels = channels
 
+        print("No Download Mode is:", NO_DOWNLOAD_MODE)
         self.__load_all_states()
 
     def __load_all_states(self):
@@ -206,6 +212,11 @@ class DataManager:
         channel_files = []
         for channel in self.__channels:
             rad_file = rad_retriever.find_rad_by_set_time(channel)
+
+            # skip this if the file is missing
+            if rad_file == None:
+                return None, None
+
             channel_files.append(rad_file)
 
         # loops through every STATE in the same TIME
@@ -337,13 +348,14 @@ if __name__ == "__main__":
     while data_date[0] is not 2018:
         radiance_features, weather_labels = data_retriever.get_formatted_data()
 
-        radiance_features_nparray = np.array(radiance_features)
-        weather_labels_nparray = np.array(weather_labels)
+        if radiance_features is not None:
+            radiance_features_nparray = np.array(radiance_features)
+            weather_labels_nparray = np.array(weather_labels)
 
-        save_path = str.format("NumpyDataFiles/{0}-{1}-{2}-{3}", *data_date)
+            save_path = str.format("NumpyDataFiles/{0}-{1}-{2}-{3}", *data_date)
 
-        np.save(save_path + "-rad_feature", radiance_features_nparray)
-        np.save(save_path + "-weather_label", weather_labels_nparray)
+            np.save(save_path + "-rad_feature", radiance_features_nparray)
+            np.save(save_path + "-weather_label", weather_labels_nparray)
 
         data_retriever.increment_date()
         data_datetime = data_retriever.get_current_date()
