@@ -249,19 +249,14 @@ class DataManager:
                 if not valid_data:
                     continue
 
-                # make sure there's data in the important places
-                if len(entry["HOURLYDRYBULBTEMPF"]) == 0 or len(entry["HOURLYSKYCONDITIONS"]) == 0:
-                    continue
-
                 actual_temp = int(entry["HOURLYDRYBULBTEMPF"])
-                sky_condition = entry["HOURLYSKYCONDITIONS"]
-
                 print("Getting Weather Values from " + entry["STATION_NAME"] + "...", end="")
                 # temp label is array of size 201 where -70 degrees F is index 0 and 130 degrees F is index 200, corresponding temp is marked with 1
                 temperature_label = np.zeros(201)
                 temp_index = actual_temp + 70
                 temperature_label[temp_index] = 1
 
+                sky_condition = entry["HOURLYSKYCONDITIONS"]
                 filtered_sky_conditions = []
                 for word in sky_condition.split():
                     if "CLR" in word:
@@ -276,6 +271,8 @@ class DataManager:
                         filtered_sky_conditions.append("OVC")
                     elif "VV" in word:
                         filtered_sky_conditions.append("VV")
+                    else:
+                        continue  # data is weird, skip this one
 
                 # sky label is of size 6 where each index corresponds to the cloud conditions below
                 sky_condition_label = np.zeros(6)

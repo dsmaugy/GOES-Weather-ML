@@ -31,8 +31,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/datagrabber.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="488">
-              <caret line="349" column="62" selection-start-line="349" selection-start-column="62" selection-end-line="349" selection-end-column="62" />
+            <state relative-caret-position="822">
+              <caret line="258" column="60" selection-start-line="258" selection-start-column="60" selection-end-line="258" selection-end-column="60" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -254,7 +254,21 @@
       <option name="project" value="LOCAL" />
       <updated>1551485259427</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="added check if no data for temp or sky">
+      <created>1551486058427</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1551486058427</updated>
+    </task>
+    <task id="LOCAL-00008" summary="fixed naming numpy files">
+      <created>1551486095799</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1551486095799</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TodoView">
@@ -267,8 +281,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-1" width="1920" height="1054" extended-state="7" />
-    <editor active="true" />
+    <frame x="0" y="-1" width="1920" height="1054" extended-state="6" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12335266" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -296,7 +309,9 @@
     <MESSAGE value="restructured the organization, 3 different classes to interact with the data&#10;&#10;curently working on finalizing the function to convert the data into numpy arrays to feed into TF" />
     <MESSAGE value="first attempt at running on compute engine&#10;data collection should loop and save the numpy arrays" />
     <MESSAGE value="fixed subscriptable datetime error" />
-    <option name="LAST_COMMIT_MESSAGE" value="fixed subscriptable datetime error" />
+    <MESSAGE value="added check if no data for temp or sky" />
+    <MESSAGE value="fixed naming numpy files" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed naming numpy files" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -445,8 +460,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/datagrabber.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="488">
-          <caret line="349" column="62" selection-start-line="349" selection-start-column="62" selection-end-line="349" selection-end-column="62" />
+        <state relative-caret-position="822">
+          <caret line="258" column="60" selection-start-line="258" selection-start-column="60" selection-end-line="258" selection-end-column="60" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>
