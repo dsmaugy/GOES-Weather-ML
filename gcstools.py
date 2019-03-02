@@ -88,9 +88,9 @@ def crop_image(nc, data, clat, clon, dqf=None):
    logging.info('Remapping from {}'.format(old_grid))
 
    if dqf is not None:
-       return pr.kd_tree.resample_nearest(old_grid, data, new_grid, radius_of_influence=50000, nprocs=3), pr.kd_tree.resample_nearest(old_grid, dqf, new_grid, radius_of_influence=50000, nprocs=3)
+       return pr.kd_tree.resample_nearest(old_grid, data, new_grid, radius_of_influence=50000, nprocs=7), pr.kd_tree.resample_nearest(old_grid, dqf, new_grid, radius_of_influence=50000, nprocs=7)
    else:
-       return pr.kd_tree.resample_nearest(old_grid, data, new_grid, radius_of_influence=50000, nprocs=4)
+       return pr.kd_tree.resample_nearest(old_grid, data, new_grid, radius_of_influence=50000, nprocs=7)
 
 
 

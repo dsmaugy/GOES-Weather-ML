@@ -282,8 +282,9 @@ class DataManager:
                         filtered_sky_conditions.append("OVC")
                     elif "VV" in word:
                         filtered_sky_conditions.append("VV")
-                    else:
-                        continue  # data is weird, skip this one
+
+                if len(filtered_sky_conditions) == 0:
+                    continue  # data is weird, skip this one
 
                 # sky label is of size 6 where each index corresponds to the cloud conditions below
                 sky_condition_label = np.zeros(6)
@@ -342,7 +343,7 @@ class DataManager:
 
 
 if __name__ == "__main__":
-    data_date = (2017, 8, 1, 0)
+    data_date = (2017, 8, 1, 9)
     data_retriever = DataManager(starting_date=data_date, channels=["C13", "C14", "C15", "C16"])
 
     while data_date[0] is not 2018:
