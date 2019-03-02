@@ -67,12 +67,12 @@ class CsvDataGrabber:
                     if day == input_day:
                         if hour == input_hour and minute == 0:
 
-                            if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0 and row["HOURLYDRYBULBTEMPF"].isnumeric():
+                            if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0 and str.isnumeric(row["HOURLYDRYBULBTEMPF"]):
                                 yield row
                         elif hour + 1 == input_hour:
                             if minute > 50:
 
-                                if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0 and row["HOURLYDRYBULBTEMPF"].isnumeric():
+                                if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0 and str.isnumeric(row["HOURLYDRYBULBTEMPF"]):
                                     yield row
 
                         elif hour >= input_hour:
@@ -84,7 +84,7 @@ class CsvDataGrabber:
                         if input_hour == 0:
                             if hour == 23:
                                 if minute > 50:
-                                    if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0 and row["HOURLYDRYBULBTEMPF"].isnumeric():
+                                    if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0 and str.isnumeric(row["HOURLYDRYBULBTEMPF"]):
                                         yield row
 
 
@@ -259,14 +259,19 @@ class DataManager:
                 if not valid_data:
                     continue
 
-                actual_temp = int(entry["HOURLYDRYBULBTEMPF"])
+                try:
+                    actual_temp = int(entry["HOURLYDRYBULBTEMPF"])
+                    sky_condition = entry["HOURLYSKYCONDITIONS"]
+                except:
+                    continue  #  another data check, probably not needed
+
+
                 print("Getting Weather Values from " + entry["STATION_NAME"] + "...", end="")
                 # temp label is array of size 201 where -70 degrees F is index 0 and 130 degrees F is index 200, corresponding temp is marked with 1
                 temperature_label = np.zeros(201)
                 temp_index = actual_temp + 70
                 temperature_label[temp_index] = 1
 
-                sky_condition = entry["HOURLYSKYCONDITIONS"]
                 filtered_sky_conditions = []
                 for word in sky_condition.split():
                     if "CLR" in word:
