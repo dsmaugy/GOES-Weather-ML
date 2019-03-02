@@ -4,10 +4,9 @@
     <option name="SCOPE_TYPE" value="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="02cf5325-2bb3-446a-a662-5bfec6377796" name="Default Changelist" comment="restructured the organization, 3 different classes to interact with the data&#10;&#10;curently working on finalizing the function to convert the data into numpy arrays to feed into TF">
+    <list default="true" id="02cf5325-2bb3-446a-a662-5bfec6377796" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/datagrabber.py" beforeDir="false" afterPath="$PROJECT_DIR$/datagrabber.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gcstools.py" beforeDir="false" afterPath="$PROJECT_DIR$/gcstools.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,8 +19,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gcstools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1185">
-              <caret line="90" column="31" selection-start-line="90" selection-start-column="31" selection-end-line="90" selection-end-column="31" />
+            <state relative-caret-position="315">
+              <caret line="90" column="194" selection-start-line="90" selection-start-column="194" selection-end-line="90" selection-end-column="194" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
               </folding>
@@ -32,8 +31,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/datagrabber.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="458">
-              <caret line="345" column="38" selection-start-line="345" selection-start-column="38" selection-end-line="345" selection-end-column="38" />
+            <state relative-caret-position="488">
+              <caret line="349" column="62" selection-start-line="349" selection-start-column="62" selection-end-line="349" selection-end-column="62" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -121,6 +120,11 @@
               <item name="GOES-Weather-ML" type="b2602c69:ProjectViewProjectNode" />
               <item name="GOES-Weather-ML" type="462c0819:PsiDirectoryNode" />
               <item name="config" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="GOES-Weather-ML" type="b2602c69:ProjectViewProjectNode" />
+              <item name="GOES-Weather-ML" type="462c0819:PsiDirectoryNode" />
+              <item name="SatFiles" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -236,7 +240,21 @@
       <option name="project" value="LOCAL" />
       <updated>1551232730290</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="first attempt at running on compute engine&#10;data collection should loop and save the numpy arrays">
+      <created>1551475964428</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1551475964429</updated>
+    </task>
+    <task id="LOCAL-00006" summary="fixed subscriptable datetime error">
+      <created>1551485259427</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1551485259427</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TodoView">
@@ -249,7 +267,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-1" width="1920" height="1054" extended-state="6" />
+    <frame x="0" y="-1" width="1920" height="1054" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.12335266" />
@@ -276,7 +294,9 @@
     <MESSAGE value="Data grabbing is now optimized, iterator will &quot;remember&quot; where it left off and will not have to loop from the start again" />
     <MESSAGE value="significantly increased speed by storing timezone data into dictionary, finally fixed time stuff and added support for daylight savings" />
     <MESSAGE value="restructured the organization, 3 different classes to interact with the data&#10;&#10;curently working on finalizing the function to convert the data into numpy arrays to feed into TF" />
-    <option name="LAST_COMMIT_MESSAGE" value="restructured the organization, 3 different classes to interact with the data&#10;&#10;curently working on finalizing the function to convert the data into numpy arrays to feed into TF" />
+    <MESSAGE value="first attempt at running on compute engine&#10;data collection should loop and save the numpy arrays" />
+    <MESSAGE value="fixed subscriptable datetime error" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed subscriptable datetime error" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -415,8 +435,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/gcstools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1185">
-          <caret line="90" column="31" selection-start-line="90" selection-start-column="31" selection-end-line="90" selection-end-column="31" />
+        <state relative-caret-position="315">
+          <caret line="90" column="194" selection-start-line="90" selection-start-column="194" selection-end-line="90" selection-end-column="194" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
           </folding>
@@ -425,8 +445,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/datagrabber.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="458">
-          <caret line="345" column="38" selection-start-line="345" selection-start-column="38" selection-end-line="345" selection-end-column="38" />
+        <state relative-caret-position="488">
+          <caret line="349" column="62" selection-start-line="349" selection-start-column="62" selection-end-line="349" selection-end-column="62" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
           </folding>

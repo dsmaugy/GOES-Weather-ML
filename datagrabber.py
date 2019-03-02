@@ -249,15 +249,20 @@ class DataManager:
                 if not valid_data:
                     continue
 
+                # make sure there's data in the important places
+                if len(entry["HOURLYDRYBULBTEMPF"]) == 0 or len(entry["HOURLYSKYCONDITIONS"]) == 0:
+                    continue
+
+                actual_temp = int(entry["HOURLYDRYBULBTEMPF"])
+                sky_condition = entry["HOURLYSKYCONDITIONS"]
+
                 print("Getting Weather Values from " + entry["STATION_NAME"] + "...", end="")
                 # temp label is array of size 201 where -70 degrees F is index 0 and 130 degrees F is index 200, corresponding temp is marked with 1
                 temperature_label = np.zeros(201)
-                actual_temp = int(entry["HOURLYDRYBULBTEMPF"])
                 temp_index = actual_temp + 70
                 temperature_label[temp_index] = 1
 
                 filtered_sky_conditions = []
-                sky_condition = entry["HOURLYSKYCONDITIONS"]
                 for word in sky_condition.split():
                     if "CLR" in word:
                         filtered_sky_conditions.append("CLR")
@@ -346,5 +351,7 @@ if __name__ == "__main__":
         data_retriever.increment_date()
         data_datetime = data_retriever.get_current_date()
         data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
+
+        print("Done with 1 hour iteration... moving on to next")
 
 # ["C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16"]
