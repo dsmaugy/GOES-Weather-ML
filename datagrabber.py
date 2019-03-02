@@ -9,7 +9,6 @@ import pytz
 import dateutil.parser
 import numpy as np
 import gcstools
-import matplotlib.pyplot as plt
 
 NO_DOWNLOAD_MODE = False
 
@@ -68,12 +67,12 @@ class CsvDataGrabber:
                     if day == input_day:
                         if hour == input_hour and minute == 0:
 
-                            if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0:
+                            if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0 and row["HOURLYDRYBULBTEMPF"].isnumeric():
                                 yield row
                         elif hour + 1 == input_hour:
                             if minute > 50:
 
-                                if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0:
+                                if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0 and row["HOURLYDRYBULBTEMPF"].isnumeric():
                                     yield row
 
                         elif hour >= input_hour:
@@ -85,7 +84,7 @@ class CsvDataGrabber:
                         if input_hour == 0:
                             if hour == 23:
                                 if minute > 50:
-                                    if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0:
+                                    if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0 and row["HOURLYDRYBULBTEMPF"].isnumeric():
                                         yield row
 
 
@@ -343,7 +342,7 @@ class DataManager:
 
 
 if __name__ == "__main__":
-    data_date = (2017, 8, 1, 9)
+    data_date = (2017, 8, 1, 20)
     data_retriever = DataManager(starting_date=data_date, channels=["C13", "C14", "C15", "C16"])
 
     while data_date[0] is not 2018:
