@@ -347,7 +347,7 @@ class DataManager:
 
 
 if __name__ == "__main__":
-    data_date = (2017, 8, 1, 20)
+    data_date = (2017, 8, 3, 3)
     data_retriever = DataManager(starting_date=data_date, channels=["C13", "C14", "C15", "C16"])
 
     while data_date[0] is not 2018:
@@ -366,6 +366,6 @@ if __name__ == "__main__":
         data_datetime = data_retriever.get_current_date()
         data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
 
-        print("Done with 1 hour iteration... moving on to next")
+        print("Done with 1 hour iteration... moving on to ", data_date)
 
 # ["C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16"]
