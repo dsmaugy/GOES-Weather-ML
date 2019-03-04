@@ -9,8 +9,11 @@ import pytz
 import dateutil.parser
 import numpy as np
 import gcstools
+import pickle
 
 NO_DOWNLOAD_MODE = False
+DATE_PICKLE_NAME = "datagrabberdate.pickle"
+PICKLE_MODE = False
 
 
 class CsvDataGrabber:
@@ -184,7 +187,7 @@ class RadianceDataGrabber:
 
 class DataManager:
 
-    def __init__(self, starting_date=(2017, 8, 1, 1), channels=("C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16")):
+    def __init__(self, starting_date, channels=("C01", "C02", "C03", "C04", "C05", "C06", "C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16")):
         self.__csv_states = []
         self.__current_date = datetime(year=starting_date[0], month=starting_date[1], day=starting_date[2], hour=starting_date[3])
         self.__channels = channels
@@ -345,10 +348,27 @@ class DataManager:
     def get_current_date(self):
         return self.__current_date
 
+    def pickle_date(self):
+        pickle.dump(self.__current_date, open(DATE_PICKLE_NAME, "wb"))
+
+    # for debug purposes
+    def print_all_states(self):
+        print([f for f in listdir("WeatherData/") if isfile(join("WeatherData/", f))])
+
+
 
 if __name__ == "__main__":
-    data_date = (2017, 8, 3, 3)
+    if PICKLE_MODE:
+        print("Using Pickled Date")
+        data_datetime = pickle.load(open(DATE_PICKLE_NAME, "rb"))
+        data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
+    else:
+        data_date = (2017, 8, 8, 1)
+        print("Using explicitly set date:", data_date)
+
     data_retriever = DataManager(starting_date=data_date, channels=["C13", "C14", "C15", "C16"])
+
+    print(data_retriever.print_all_states())
 
     while data_date[0] is not 2018:
         radiance_features, weather_labels = data_retriever.get_formatted_data()
@@ -366,6 +386,8 @@ if __name__ == "__main__":
         data_datetime = data_retriever.get_current_date()
         data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
 
+        data_retriever.pickle_date()
+        print("Sucesfully pickled current date")
         print("Done with 1 hour iteration... moving on to ", data_date)
 
 # ["C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16"]
