@@ -14,6 +14,7 @@ import pickle
 NO_DOWNLOAD_MODE = False
 DATE_PICKLE_NAME = "datagrabberdate.pickle"
 PICKLE_MODE = False
+VERBOSE_PRINT_MODE = True
 
 
 class CsvDataGrabber:
@@ -29,7 +30,6 @@ class CsvDataGrabber:
         self.__timezone_dict = {}
 
     def __read_csv(self, csv_reader, input_year, input_month, input_day, input_hour):
-        i = 0
         start_time = time.time()
         tf = timezonefinder.TimezoneFinder()
 
@@ -90,18 +90,11 @@ class CsvDataGrabber:
                                     if len(row["HOURLYSKYCONDITIONS"]) > 0 and len(row["HOURLYDRYBULBTEMPF"]) > 0 and str.isnumeric(row["HOURLYDRYBULBTEMPF"]):
                                         yield row
 
-
-
-            # print("Local Time:", row_date, row_date.tzname(), "Iteration:", i)
-            # print("UTC:", row_date.utctimetuple())
-            # print()
-
-            i += 1
-
         end_time = time.time()
 
-        print("Time Elapsed:", end_time - start_time)
-        print("Found Entries:")
+        if VERBOSE_PRINT_MODE:
+            print("Time Elapsed:", end_time - start_time)
+            print("Found Entries:")
 
     def __initialize_csv(self):
         csv_file = open(self.__CSV_PATH)
@@ -111,7 +104,8 @@ class CsvDataGrabber:
         self.csv_file.close()
 
     def find_row_by_time(self, input_year, input_month, input_day, input_hour):
-        print("Finding Entry in: %s for %s" % (self.__state, self.__current_date))
+        if VERBOSE_PRINT_MODE:
+            print("Finding Entry in: %s for %s" % (self.__state, self.__current_date))
 
         if not self.__file_is_active:
             self.__csv_reader = self.__initialize_csv()
@@ -143,15 +137,15 @@ class CsvDataGrabber:
                         else:
                             if j not in indexes_to_pop:
                                 indexes_to_pop.append(j)
-            datetime
+
             # get rid of the duplicates
             for pop_index in sorted(indexes_to_pop, reverse=True):
                 # if pop_index < len(matching_rows): # bruh
                 matching_rows.pop(pop_index)
 
-        for sanitized_row in matching_rows:
-            print(sanitized_row["STATION_NAME"], sanitized_row["DATE"])
-
+        if VERBOSE_PRINT_MODE:
+            for sanitized_row in matching_rows:
+                print(sanitized_row["STATION_NAME"], sanitized_row["DATE"])
 
         return matching_rows
 
@@ -173,7 +167,9 @@ class RadianceDataGrabber:
             try:
                 ncs_file_id = gcstools.get_objectId_at(self.time, product="ABI-L1b-RadC", channel=channel)
                 rad_file = gcstools.copy_fromgcs(gcstools.GOES_PUBLIC_BUCKET, ncs_file_id, "SatFiles/SatFile-" + channel)
-                print("Downloaded", rad_file)
+
+                if VERBOSE_PRINT_MODE:
+                    print("Downloaded", rad_file)
 
             except:
                 return None
@@ -181,7 +177,10 @@ class RadianceDataGrabber:
                 return rad_file
         else:
             rad_file = "SatFiles/SatFile-" + channel
-            print("Found", rad_file)
+
+            if VERBOSE_PRINT_MODE:
+                print("Found", rad_file)
+
             return rad_file
 
 
@@ -228,7 +227,8 @@ class DataManager:
             station_entries = s.find_row_by_set_time()
 
             if len(station_entries) == 0:
-                print("Empty Dataset, skipping this set time")
+                if VERBOSE_PRINT_MODE:
+                    print("Empty Dataset, skipping this set time")
                 continue
 
             state_start_time = time.time()
@@ -241,7 +241,8 @@ class DataManager:
 
                 # loops through every CHANNEL in the SAME STATION
                 for file in channel_files:
-                    print("Getting Radiance Channel " + file + " from " + entry["STATION_NAME"] + "...", end="")
+                    if VERBOSE_PRINT_MODE:
+                        print("Getting Radiance Channel " + file + " from " + entry["STATION_NAME"] + "...", end="")
 
                     with Dataset(file) as nc:
                         rad = nc.variables["Rad"][:]
@@ -257,7 +258,8 @@ class DataManager:
 
                         channel_rad_data.append(rad)
 
-                        print("Done")
+                        if VERBOSE_PRINT_MODE:
+                            print("Done")
 
                 if not valid_data:
                     continue
@@ -268,8 +270,9 @@ class DataManager:
                 except:
                     continue  #  another data check, probably not needed
 
+                if VERBOSE_PRINT_MODE:
+                    print("Getting Weather Values from " + entry["STATION_NAME"] + "...", end="")
 
-                print("Getting Weather Values from " + entry["STATION_NAME"] + "...", end="")
                 # temp label is array of size 201 where -70 degrees F is index 0 and 130 degrees F is index 200, corresponding temp is marked with 1
                 temperature_label = np.zeros(201)
                 temp_index = actual_temp + 70
@@ -329,12 +332,14 @@ class DataManager:
                 radiance_feature_input.append(channel_rad_data)
                 weather_label_output.append(total_weather_labels)
 
-                print("Done")
+                if VERBOSE_PRINT_MODE:
+                    print("Done")
 
             state_end_time = time.time()
 
-            print("Time Elapsed for Data Grabbing:", state_end_time - state_start_time)
-            print("-----------------------------")
+            if VERBOSE_PRINT_MODE:
+                print("Time Elapsed for Data Grabbing:", state_end_time - state_start_time)
+                print("-----------------------------")
 
         return radiance_feature_input, weather_label_output
 
@@ -356,7 +361,6 @@ class DataManager:
         print([f for f in listdir("WeatherData/") if isfile(join("WeatherData/", f))])
 
 
-
 if __name__ == "__main__":
     if PICKLE_MODE:
         print("Using Pickled Date")
@@ -370,10 +374,10 @@ if __name__ == "__main__":
 
     print(data_retriever.print_all_states())
 
-    while data_date[0] is not 2018:
+    while data_date[0] is not 2018 and data_date[1] is not 12:
         radiance_features, weather_labels = data_retriever.get_formatted_data()
 
-        if radiance_features is not None:
+        if radiance_features is not None and len(radiance_features) > 1:
             radiance_features_nparray = np.array(radiance_features)
             weather_labels_nparray = np.array(weather_labels)
 
@@ -381,13 +385,12 @@ if __name__ == "__main__":
 
             np.save(save_path + "-rad_feature", radiance_features_nparray)
             np.save(save_path + "-weather_label", weather_labels_nparray)
+            print("Successfully saved numpy data!")
 
         data_retriever.increment_date()
         data_datetime = data_retriever.get_current_date()
         data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
 
         data_retriever.pickle_date()
-        print("Sucesfully pickled current date")
+        print("Successfully pickled current date")
         print("Done with 1 hour iteration... moving on to ", data_date)
-
-# ["C07", "C08", "C09", "C10", "C11", "C12", "C13", "C14", "C15", "C16"]
