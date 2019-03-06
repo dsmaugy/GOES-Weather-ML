@@ -367,7 +367,7 @@ if __name__ == "__main__":
         data_datetime = pickle.load(open(DATE_PICKLE_NAME, "rb"))
         data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
     else:
-        data_date = (2017, 8, 8, 1)
+        data_date = (2018, 2, 1, 0)
         print("Using explicitly set date:", data_date)
 
     data_retriever = DataManager(starting_date=data_date, channels=["C13", "C14", "C15", "C16"])
