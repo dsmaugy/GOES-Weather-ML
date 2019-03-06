@@ -374,7 +374,7 @@ if __name__ == "__main__":
 
     print(data_retriever.print_all_states())
 
-    while data_date[0] is not 2018 and data_date[1] is not 12:
+    while True:
         radiance_features, weather_labels = data_retriever.get_formatted_data()
 
         if radiance_features is not None and len(radiance_features) > 1:
