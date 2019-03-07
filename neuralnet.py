@@ -24,6 +24,8 @@ file_already_processed_list = []
 MIN_RAD = 1
 MAX_RAD = 140
 
+CONV_DATA_FORMAT = "channels_last"
+
 
 def get_data_loop():
     if PICKLE_MODE:
@@ -143,34 +145,33 @@ def grab_numpy_arrays():
 
 
 def create_temperature_branch(inputs):
-    x = layers.Conv2D(filters=12, kernel_size=2, activation="relu", data_format="channels_first")(inputs)
-    x = layers.BatchNormalization()(x)
+    x = layers.Conv2D(filters=12, kernel_size=2, activation="relu", data_format=CONV_DATA_FORMAT)(inputs)
     x = layers.MaxPool2D(pool_size=2)(x)
+    x = layers.BatchNormalization()(x)
 
     x = layers.Conv2D(filters=32, kernel_size=1, activation="relu")(x)
     x = layers.BatchNormalization()(x)
 
     x = layers.Flatten()(x)
     x = layers.Dense(32, activation="sigmoid")(x)
-    x = layers.Dense(200, activation="softmax", name="temperature_output")(x)
+    x = layers.Dense(201, activation="softmax", name="temperature_output")(x)
 
     return x
 
 
-def create_classifier_branch(inputs, name):
+def create_classifier_branch(inputs):
     print (inputs.shape)
-    x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format="channels_first")(inputs)
+    x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=CONV_DATA_FORMAT)(inputs)
+    x = layers.MaxPool2D(pool_size=3)(x)
+    x = layers.BatchNormalization()(x)
+    print(x.shape)
+
+    x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=CONV_DATA_FORMAT)(x)
     x = layers.MaxPool2D(pool_size=2)(x)
     x = layers.BatchNormalization()(x)
     print(x.shape)
 
-
-    x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format="channels_first")(x)
-    x = layers.MaxPool2D(pool_size=2)(x)
-    x = layers.BatchNormalization()(x)
-    print(x.shape)
-
-    x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format="channels_first")(x)
+    x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=CONV_DATA_FORMAT)(x)
     x = layers.MaxPool2D(pool_size=2)(x)
     x = layers.BatchNormalization()(x)
     print(x.shape)
@@ -179,45 +180,56 @@ def create_classifier_branch(inputs, name):
     x = layers.Dense(120, activation="sigmoid", bias_regularizer=regularizers.l2(.01))(x)
     print(x.shape)
 
-    x = layers.Dense(10, activation="sigmoid", name=name)(x)
+    x = layers.Dense(10, activation="sigmoid", name="classifier_output")(x)
 
     print(x.shape)
     return x
 
 
 def create_model(width, height):
-    inputs = tf.keras.Input(shape=(4, height, width))
+    if CONV_DATA_FORMAT == "channels_last":
+        inputs = tf.keras.Input(shape=(height, width, 4))
+    else:
+        inputs = tf.keras.Input(shape=(4, height, width))
 
-    cloud_branch = create_classifier_branch(inputs, name="cloud_branch")
-    weather_classify_branch = create_classifier_branch(inputs, name="weather_condition")
+
+    classifier_branch = create_classifier_branch(inputs)
     temperature_branch = create_temperature_branch(inputs)
 
-    tfmodel = tf.keras.Model(inputs=inputs, outputs=[cloud_branch, weather_classify_branch, temperature_branch])
+    tfmodel = tf.keras.Model(inputs=inputs, outputs=[classifier_branch, temperature_branch])
+
+    losses = {"classifier_output": "categorical_crossentropy",
+              "temperature_output": "categorical_crossentropy"}
+
+    tfmodel.compile(optimizer=tf.train.AdamOptimizer(), metrics=["accuracy"], loss=losses)
 
     return tfmodel
 
 
 if __name__ == "__main__":
-    features, labels = grab_numpy_arrays()
-    features = format_numpy_arrays(features)
-    labels = format_numpy_arrays(labels)
-
-    features = normalize_radiance_array(features)
-
-    print(features.shape)
-
     model = create_model(100, 100)
-    losses = {"cloud_branch": "categorical_crossentropy",
-              "temperature_output": "categorical_crossentropy",
-              "weather_condition": "categorical_crossentropy"}
 
-    model.compile(optimizer=tf.train.AdamOptimizer(), metrics=["accuracy"], loss=losses)
+    while True:
+        features, labels = grab_numpy_arrays()
 
-    labels_classifier = labels[:, 1:3]
-    cloud_labels = labels_classifier[:, 0]
-    labels_temperature = labels[:, 0]
-    print(labels_classifier[:][1].shape)
-    # model.fit(features, {"classifier_output": labels_classifier, "temperature_output": labels_temperature}, batch_size=BATCH_SIZE, epochs=1)
+        if features is None:
+            break
 
+        features = format_numpy_arrays(features)
+        labels = format_numpy_arrays(labels)
+        features = normalize_radiance_array(features)
 
+        # transform the cloud + condition labels to one array
+        cloud_labels = labels[:, 1]
+        condition_labels = labels[:, 2]
 
+        stack_clouds = np.stack(cloud_labels)
+        stack_condition = np.stack(condition_labels)
+
+        labels_classifier = np.concatenate((stack_clouds, stack_condition), 1)
+        labels_temperature = np.stack(labels[:, 0])
+
+        if CONV_DATA_FORMAT == "channels_last":
+            features = features.transpose([0, 2, 3, 1])
+
+        model.fit(features, {"classifier_output": labels_classifier, "temperature_output": labels_temperature}, batch_size=BATCH_SIZE, epochs=2)
