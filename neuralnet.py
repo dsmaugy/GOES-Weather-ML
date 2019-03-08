@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras import regularizers
 from datagrabber import DataManager
-from sklearn.preprocessing import MinMaxScaler
 from datetime import timedelta, datetime
 import numpy as np
 import pickle
@@ -41,6 +40,7 @@ class TFDataManager:
         rad_features = None
         weather_labels = None
 
+        count_index = 1
         while not data_collected and len(self.__file_already_processed_list) < len(data_files_in_directory):
             for i in range(len(self.__all_dates)):
                 rad_file = str(self.__all_dates[i].year) + "-" + str(self.__all_dates[i].month) + "-" + str(
@@ -79,8 +79,10 @@ class TFDataManager:
 
                 print("Sub Shape:", rad_file_data.shape)
                 print("Total Shape", rad_features.shape)
+                print("Index", count_index)
                 print()
 
+                count_index += 1
                 first_data_append = False
 
             for i in range(len(self.__all_dates)):
@@ -99,7 +101,8 @@ class TFDataManager:
         
         rad_features = TFDataManager.format_numpy_arrays(rad_features)
         weather_labels = TFDataManager.format_numpy_arrays(weather_labels)
-        
+
+        # normalize data between 0-1
         rad_features = TFDataManager.normalize_radiance_array(rad_features)
 
         # shuffle the arrays, mainly for splitting up validation data
@@ -120,38 +123,38 @@ class TFDataManager:
 
         return rad_features, labels_classifier, labels_temperature
 
-    def get_data_loop(self):
-        if PICKLE_MODE:
-            print("Using Pickled Date")
-            data_datetime = pickle.load(open(DATE_PICKLE_NAME, "rb"))
-            data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
-        else:
-            data_date = (2017, 8, 8, 1)
-            print("Using explicitly set date:", data_date)
-
-        data_retriever = DataManager(starting_date=data_date, channels=["C13", "C14", "C15", "C16"])
-
-        print(data_retriever.print_all_states())
-
-        while data_date[0] is not 2018 and data_date[1] is not 12:
-            radiance_features, weather_labels = data_retriever.get_formatted_data()
-
-            if radiance_features is not None:
-                radiance_features_nparray = np.array(radiance_features)
-                weather_labels_nparray = np.array(weather_labels)
-
-                save_path = str.format("NumpyDataFiles/{0}-{1}-{2}-{3}", *data_date)
-
-                np.save(save_path + "-rad_feature", radiance_features_nparray)
-                np.save(save_path + "-weather_label", weather_labels_nparray)
-
-            data_retriever.increment_date()
-            data_datetime = data_retriever.get_current_date()
-            data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
-
-            data_retriever.pickle_date()
-            print("Sucesfully pickled current date")
-            print("Done with 1 hour iteration... moving on to ", data_date)
+    # def get_data_loop(self):
+    #     if PICKLE_MODE:
+    #         print("Using Pickled Date")
+    #         data_datetime = pickle.load(open(DATE_PICKLE_NAME, "rb"))
+    #         data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
+    #     else:
+    #         data_date = (2017, 8, 8, 1)
+    #         print("Using explicitly set date:", data_date)
+    #
+    #     data_retriever = DataManager(starting_date=data_date, channels=["C13", "C14", "C15", "C16"])
+    #
+    #     print(data_retriever.print_all_states())
+    #
+    #     while data_date[0] is not 2018 and data_date[1] is not 12:
+    #         radiance_features, weather_labels = data_retriever.get_formatted_data()
+    #
+    #         if radiance_features is not None:
+    #             radiance_features_nparray = np.array(radiance_features)
+    #             weather_labels_nparray = np.array(weather_labels)
+    #
+    #             save_path = str.format("NumpyDataFiles/{0}-{1}-{2}-{3}", *data_date)
+    #
+    #             np.save(save_path + "-rad_feature", radiance_features_nparray)
+    #             np.save(save_path + "-weather_label", weather_labels_nparray)
+    #
+    #         data_retriever.increment_date()
+    #         data_datetime = data_retriever.get_current_date()
+    #         data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
+    #
+    #         data_retriever.pickle_date()
+    #         print("Sucesfully pickled current date")
+    #         print("Done with 1 hour iteration... moving on to ", data_date)
     
     @staticmethod
     def format_numpy_arrays(array):
@@ -164,10 +167,21 @@ class TFDataManager:
     def normalize_radiance_array(rad_array):
         for entry_index in range(rad_array.shape[0]):
             for channel_index in range(rad_array.shape[1]):
-                scaler = MinMaxScaler()
+                # channel 13
+                if channel_index == 0:
+                    rad_array[entry_index, channel_index]  = (rad_array[entry_index, channel_index] - -0.4935) / (183.62 - -0.4935)
 
-                scaler.fit([[MIN_RAD], [MAX_RAD]])
-                rad_array[entry_index, channel_index] = scaler.transform(rad_array[entry_index, channel_index])
+                # channel 14
+                elif channel_index == 1:
+                    rad_array[entry_index, channel_index]  = (rad_array[entry_index, channel_index] - -0.5154) / (198.71 - -0.5154)
+
+                # channel 15
+                elif channel_index == 2:
+                    rad_array[entry_index, channel_index]  = (rad_array[entry_index, channel_index] - -0.5262) / (212.28 - -0.5262)
+
+                # channel 16
+                elif channel_index == 3:
+                    rad_array[entry_index, channel_index]  = (rad_array[entry_index, channel_index] - -1.5726) / (170.19 - -1.5726)
 
         return rad_array
 
@@ -205,7 +219,7 @@ class NeuralNet:
         tfmodel = tf.keras.Model(inputs=inputs, outputs=[classifier_branch, temperature_branch])
 
         losses = {"classifier_output": "categorical_crossentropy",
-                  "temperature_output": "binary_crossentropy"}
+                  "temperature_output": "categorical_crossentropy"}
 
         tfmodel.compile(optimizer=tf.train.AdamOptimizer(), metrics=["categorical_accuracy"], loss=losses)
 
@@ -229,7 +243,7 @@ class NeuralNet:
         print(x.shape)
 
         x = layers.Flatten()(x)
-        x = layers.Dense(320, activation="sigmoid", bias_regularizer=regularizers.l2(100))(x)
+        x = layers.Dense(320, activation="sigmoid", bias_regularizer=regularizers.l2(.01))(x)
         print(x.shape)
 
         x = layers.Dense(10, activation="softmax", name="classifier_output")(x)
@@ -246,7 +260,8 @@ class NeuralNet:
         x = layers.BatchNormalization()(x)
 
         x = layers.Flatten()(x)
-        x = layers.Dense(32, activation="sigmoid")(x)
+        x = layers.Dense(400, activation="sigmoid")(x)
+        x = layers.Dense(300, activation="sigmoid")(x)
         x = layers.Dense(201, activation="softmax", name="temperature_output")(x)
 
         return x
@@ -272,6 +287,6 @@ if __name__ == "__main__":
         rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(rad_array=rad_features, classify_array=class_label,
                                                                                                                                  temperature_array=temp_label, validate_percent=0.1)
 
-        model.fit(rad_features, {"classifier_output": class_label, "temperature_output": temp_label}, batch_size=BATCH_SIZE, epochs=5, validation_data=(rad_validate, {"classifier_output": class_validate, "temperature_output": temp_validate}))
+        model.fit(rad_features, {"classifier_output": class_label, "temperature_output": temp_label}, batch_size=BATCH_SIZE, epochs=1, validation_data=(rad_validate, {"classifier_output": class_validate, "temperature_output": temp_validate}))
 
         # forever_loop = False

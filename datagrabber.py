@@ -13,7 +13,7 @@ import pickle
 
 NO_DOWNLOAD_MODE = False
 DATE_PICKLE_NAME = "datagrabberdate.pickle"
-PICKLE_MODE = True
+PICKLE_MODE = False
 VERBOSE_PRINT_MODE = True
 
 
