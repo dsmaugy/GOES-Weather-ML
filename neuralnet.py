@@ -9,227 +9,269 @@ import pickle
 from os import listdir
 from os.path import isfile, join
 from math import floor
+import time
+from sklearn.utils import shuffle
 
 PICKLE_MODE = False
 DATE_PICKLE_NAME = "datagrabberdate.pickle"
+CHANNELS_MODE = "channels_last"
 
-BATCH_SIZE = 8
-
-summer_date = datetime(year=2017, month=8, day=1, hour=0)
-fall_date = datetime(year=2017, month=10, day=1, hour=0)
-all_dates = [summer_date, fall_date]
-
-file_already_processed_list = []
-
+BATCH_SIZE = 32
 MIN_RAD = 1
 MAX_RAD = 140
 
-CONV_DATA_FORMAT = "channels_last"
+'''
+# manager that helps deal with data to in order to directly feed into NN
+# takes in datetime objects to represent where to start looking for each season
+# returns tuple of 3 numpy arrays, radiance input data, weather classifier data, temperature data
+'''
+class TFDataManager:
+    def __init__(self, summer_date, fall_date, data_format, input_per_epoch):
+        self.__file_already_processed_list = []
+        self.__all_dates = [summer_date, fall_date]
+        self.__data_format = data_format
+        self.__input_per_epoch = input_per_epoch
 
+    def get_numpy_arrays(self):
+        data_files_in_directory = [f for f in listdir("NumpyDataFiles/") if isfile(join("NumpyDataFiles/", f))]
 
-def get_data_loop():
-    if PICKLE_MODE:
-        print("Using Pickled Date")
-        data_datetime = pickle.load(open(DATE_PICKLE_NAME, "rb"))
-        data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
-    else:
-        data_date = (2017, 8, 8, 1)
-        print("Using explicitly set date:", data_date)
+        data_collected = False
+        first_data_append = True
 
-    data_retriever = DataManager(starting_date=data_date, channels=["C13", "C14", "C15", "C16"])
+        rad_features = None
+        weather_labels = None
 
-    print(data_retriever.print_all_states())
+        while not data_collected and len(self.__file_already_processed_list) < len(data_files_in_directory):
+            for i in range(len(self.__all_dates)):
+                rad_file = str(self.__all_dates[i].year) + "-" + str(self.__all_dates[i].month) + "-" + str(
+                    self.__all_dates[i].day) + "-" + str(self.__all_dates[i].hour) + "-rad_feature.npy"
+                weather_file = str(self.__all_dates[i].year) + "-" + str(self.__all_dates[i].month) + "-" + str(
+                    self.__all_dates[i].day) + "-" + str(self.__all_dates[i].hour) + "-weather_label.npy"
 
-    while data_date[0] is not 2018 and data_date[1] is not 12:
-        radiance_features, weather_labels = data_retriever.get_formatted_data()
+                # data file for this date does not exist
+                if rad_file not in data_files_in_directory and weather_file not in data_files_in_directory:
+                    # print("Current date doesn't exist (", self.__self.__all_dates[i], ")")
+                    # print("Skipping...\n")
+                    continue
 
-        if radiance_features is not None:
-            radiance_features_nparray = np.array(radiance_features)
-            weather_labels_nparray = np.array(weather_labels)
+                # check these files off so we don't process them twice
+                self.__file_already_processed_list.append(rad_file)
+                self.__file_already_processed_list.append(weather_file)
 
-            save_path = str.format("NumpyDataFiles/{0}-{1}-{2}-{3}", *data_date)
+                # get the numpy arrays from these files
+                rad_file_data = np.load("NumpyDataFiles/" + rad_file)
+                weather_file_data = np.load("NumpyDataFiles/" + weather_file)
 
-            np.save(save_path + "-rad_feature", radiance_features_nparray)
-            np.save(save_path + "-weather_label", weather_labels_nparray)
+                # bad data, skip this iteration
+                if rad_file_data.shape == (0,) or weather_file_data.shape == (0,):
+                    # print("Bad file, skipping...\n")
+                    continue
 
-        data_retriever.increment_date()
-        data_datetime = data_retriever.get_current_date()
-        data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
+                print("Found valid file", rad_file, weather_file)
+                print("Getting values now...")
+                if first_data_append:
+                    rad_features = rad_file_data
+                    weather_labels = weather_file_data
 
-        data_retriever.pickle_date()
-        print("Sucesfully pickled current date")
-        print("Done with 1 hour iteration... moving on to ", data_date)
+                else:
+                    rad_features = np.concatenate((rad_features, rad_file_data), 0)
+                    weather_labels = np.concatenate((weather_labels, weather_file_data), 0)
 
+                print("Sub Shape:", rad_file_data.shape)
+                print("Total Shape", rad_features.shape)
+                print()
 
-def format_numpy_arrays(array):
-    size_to_crop_to = floor(array.shape[0] / BATCH_SIZE) * BATCH_SIZE
-    difference = abs(array.shape[0] - size_to_crop_to)
+                first_data_append = False
 
-    return np.delete(array, np.s_[:difference], 0)
+            for i in range(len(self.__all_dates)):
+                self.__all_dates[i] = self.__all_dates[i] + timedelta(hours=1)
 
+            if rad_features is not None and weather_labels is not None and rad_features.shape[0] == weather_labels.shape[0] and rad_features.shape[0] > self.__input_per_epoch:
+                # print("Breaking out of loop\n")
+                data_collected = True
 
-def normalize_radiance_array(rad_array):
-    for entry_index in range(rad_array.shape[0]):
-        for channel_index in range(rad_array.shape[1]):
-            scaler = MinMaxScaler()
+        if rad_features is None:
+            return None, None, None  # haha
 
-            scaler.fit([[MIN_RAD], [MAX_RAD]])
-            rad_array[entry_index, channel_index] = scaler.transform(rad_array[entry_index, channel_index])
+        print("Done getting data for this epoch, here are the shapes:")
+        print(weather_labels.shape)
+        print(rad_features.shape)
+        
+        rad_features = TFDataManager.format_numpy_arrays(rad_features)
+        weather_labels = TFDataManager.format_numpy_arrays(weather_labels)
+        
+        rad_features = TFDataManager.normalize_radiance_array(rad_features)
 
-    return rad_array
-
-
-def grab_numpy_arrays():
-    global all_dates
-
-    data_files_in_directory = [f for f in listdir("NumpyDataFiles/") if isfile(join("NumpyDataFiles/", f))]
-
-    data_collected = False
-    first_data_append = True
-
-    features = None
-    labels = None
-
-    while not data_collected and len(file_already_processed_list) < len(data_files_in_directory):
-        for i in range(len(all_dates)):
-            rad_file = str(all_dates[i].year) + "-" + str(all_dates[i].month) + "-" + str(all_dates[i].day) + "-" + str(all_dates[i].hour) + "-rad_feature.npy"
-            weather_file = str(all_dates[i].year) + "-" + str(all_dates[i].month) + "-" + str(all_dates[i].day) + "-" + str(all_dates[i].hour) + "-weather_label.npy"
-
-            # data file for this date does not exist
-            if rad_file not in data_files_in_directory and weather_file not in data_files_in_directory:
-                # print("Current date doesn't exist (", all_dates[i], ")")
-                # print("Skipping...\n")
-                continue
-
-            # check these files off so we don't process them twice
-            file_already_processed_list.append(rad_file)
-            file_already_processed_list.append(weather_file)
-
-            # get the numpy arrays from these files
-            rad_file_data = np.load("NumpyDataFiles/" + rad_file)
-            weather_file_data = np.load("NumpyDataFiles/" + weather_file)
-
-            # bad data, skip this iteration
-            if rad_file_data.shape == (0,) or weather_file_data.shape == (0,):
-                # print("Bad file, skipping...\n")
-                continue
-
-            print("Found valid file", rad_file, weather_file)
-            print("Getting values now...")
-            if first_data_append:
-                features = rad_file_data
-                labels = weather_file_data
-
-            else:
-                features = np.concatenate((features, rad_file_data), 0)
-                labels = np.concatenate((labels, weather_file_data), 0)
-
-            print("Sub Shape:", rad_file_data.shape)
-            print("Total Shape", features.shape)
-            print()
-
-            first_data_append = False
-
-        for i in range(len(all_dates)):
-            all_dates[i] = all_dates[i] + timedelta(hours=1)
-
-        if features is not None and labels is not None and features.shape[0] == labels.shape[0] and features.shape[0] > 300:
-            # print("Breaking out of loop\n")
-            data_collected = True
-
-    print("Done getting data for this epoch, here are the shapes:")
-    print(labels.shape)
-    print(features.shape)
-
-    return features, labels
-
-
-def create_temperature_branch(inputs):
-    x = layers.Conv2D(filters=12, kernel_size=2, activation="relu", data_format=CONV_DATA_FORMAT)(inputs)
-    x = layers.MaxPool2D(pool_size=2)(x)
-    x = layers.BatchNormalization()(x)
-
-    x = layers.Conv2D(filters=32, kernel_size=1, activation="relu")(x)
-    x = layers.BatchNormalization()(x)
-
-    x = layers.Flatten()(x)
-    x = layers.Dense(32, activation="sigmoid")(x)
-    x = layers.Dense(201, activation="softmax", name="temperature_output")(x)
-
-    return x
-
-
-def create_classifier_branch(inputs):
-    print (inputs.shape)
-    x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=CONV_DATA_FORMAT)(inputs)
-    x = layers.MaxPool2D(pool_size=3)(x)
-    x = layers.BatchNormalization()(x)
-    print(x.shape)
-
-    x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=CONV_DATA_FORMAT)(x)
-    x = layers.MaxPool2D(pool_size=2)(x)
-    x = layers.BatchNormalization()(x)
-    print(x.shape)
-
-    x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=CONV_DATA_FORMAT)(x)
-    x = layers.MaxPool2D(pool_size=2)(x)
-    x = layers.BatchNormalization()(x)
-    print(x.shape)
-
-    x = layers.Flatten()(x)
-    x = layers.Dense(120, activation="sigmoid", bias_regularizer=regularizers.l2(.01))(x)
-    print(x.shape)
-
-    x = layers.Dense(10, activation="sigmoid", name="classifier_output")(x)
-
-    print(x.shape)
-    return x
-
-
-def create_model(width, height):
-    if CONV_DATA_FORMAT == "channels_last":
-        inputs = tf.keras.Input(shape=(height, width, 4))
-    else:
-        inputs = tf.keras.Input(shape=(4, height, width))
-
-
-    classifier_branch = create_classifier_branch(inputs)
-    temperature_branch = create_temperature_branch(inputs)
-
-    tfmodel = tf.keras.Model(inputs=inputs, outputs=[classifier_branch, temperature_branch])
-
-    losses = {"classifier_output": "categorical_crossentropy",
-              "temperature_output": "categorical_crossentropy"}
-
-    tfmodel.compile(optimizer=tf.train.AdamOptimizer(), metrics=["accuracy"], loss=losses)
-
-    return tfmodel
-
-
-if __name__ == "__main__":
-    model = create_model(100, 100)
-
-    while True:
-        features, labels = grab_numpy_arrays()
-
-        if features is None:
-            break
-
-        features = format_numpy_arrays(features)
-        labels = format_numpy_arrays(labels)
-        features = normalize_radiance_array(features)
+        # shuffle the arrays, mainly for splitting up validation data
+        rad_features, weather_labels = shuffle(rad_features, weather_labels)
 
         # transform the cloud + condition labels to one array
-        cloud_labels = labels[:, 1]
-        condition_labels = labels[:, 2]
+        cloud_labels = weather_labels[:, 1]
+        condition_labels = weather_labels[:, 2]
 
         stack_clouds = np.stack(cloud_labels)
         stack_condition = np.stack(condition_labels)
 
         labels_classifier = np.concatenate((stack_clouds, stack_condition), 1)
-        labels_temperature = np.stack(labels[:, 0])
+        labels_temperature = np.stack(weather_labels[:, 0])
 
-        if CONV_DATA_FORMAT == "channels_last":
-            features = features.transpose([0, 2, 3, 1])
+        if self.__data_format == "channels_last":
+            rad_features = rad_features.transpose([0, 2, 3, 1])
 
-        model.fit(features, {"classifier_output": labels_classifier, "temperature_output": labels_temperature}, batch_size=BATCH_SIZE, epochs=2)
+        return rad_features, labels_classifier, labels_temperature
+
+    def get_data_loop(self):
+        if PICKLE_MODE:
+            print("Using Pickled Date")
+            data_datetime = pickle.load(open(DATE_PICKLE_NAME, "rb"))
+            data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
+        else:
+            data_date = (2017, 8, 8, 1)
+            print("Using explicitly set date:", data_date)
+
+        data_retriever = DataManager(starting_date=data_date, channels=["C13", "C14", "C15", "C16"])
+
+        print(data_retriever.print_all_states())
+
+        while data_date[0] is not 2018 and data_date[1] is not 12:
+            radiance_features, weather_labels = data_retriever.get_formatted_data()
+
+            if radiance_features is not None:
+                radiance_features_nparray = np.array(radiance_features)
+                weather_labels_nparray = np.array(weather_labels)
+
+                save_path = str.format("NumpyDataFiles/{0}-{1}-{2}-{3}", *data_date)
+
+                np.save(save_path + "-rad_feature", radiance_features_nparray)
+                np.save(save_path + "-weather_label", weather_labels_nparray)
+
+            data_retriever.increment_date()
+            data_datetime = data_retriever.get_current_date()
+            data_date = (data_datetime.year, data_datetime.month, data_datetime.day, data_datetime.hour)
+
+            data_retriever.pickle_date()
+            print("Sucesfully pickled current date")
+            print("Done with 1 hour iteration... moving on to ", data_date)
+    
+    @staticmethod
+    def format_numpy_arrays(array):
+        size_to_crop_to = floor(array.shape[0] / BATCH_SIZE) * BATCH_SIZE
+        difference = abs(array.shape[0] - size_to_crop_to)
+
+        return np.delete(array, np.s_[:difference], 0)
+    
+    @staticmethod
+    def normalize_radiance_array(rad_array):
+        for entry_index in range(rad_array.shape[0]):
+            for channel_index in range(rad_array.shape[1]):
+                scaler = MinMaxScaler()
+
+                scaler.fit([[MIN_RAD], [MAX_RAD]])
+                rad_array[entry_index, channel_index] = scaler.transform(rad_array[entry_index, channel_index])
+
+        return rad_array
+
+    @staticmethod
+    def split_validation_data(rad_array, classify_array, temperature_array, validate_percent):
+        assert validate_percent < 1
+        validation_index = floor(rad_array.shape[0] * validate_percent)
+
+        rad_validate = rad_array[0:validation_index]
+        classify_validate = classify_array[0:validation_index]
+        temperature_validate = temperature_array[0:validation_index]
+
+        rad_array = np.delete(rad_array, np.s_[0:validation_index], 0)
+        classify_array = np.delete(classify_array, np.s_[0:validation_index], 0)
+        temperature_array = np.delete(temperature_array, np.s_[0:validation_index], 0)
+
+        return rad_array, classify_array, temperature_array, rad_validate, classify_validate, temperature_validate
+
+class NeuralNet:
+    
+    def __init__(self, width, height, data_format):
+        self.__width = width
+        self.__height = height
+        self.__data_format = data_format
+
+    def create_model(self):
+        if self.__data_format == "channels_last":
+            inputs = tf.keras.Input(shape=(self.__height, self.__width, 4))
+        else:
+            inputs = tf.keras.Input(shape=(4, self.__height, self.__width))
+
+        classifier_branch = self.__create_classifier_branch(inputs)
+        temperature_branch = self.__create_temperature_branch(inputs)
+
+        tfmodel = tf.keras.Model(inputs=inputs, outputs=[classifier_branch, temperature_branch])
+
+        losses = {"classifier_output": "categorical_crossentropy",
+                  "temperature_output": "binary_crossentropy"}
+
+        tfmodel.compile(optimizer=tf.train.AdamOptimizer(), metrics=["categorical_accuracy"], loss=losses)
+
+        return tfmodel
+
+    def __create_classifier_branch(self, inputs):
+        print(inputs.shape)
+        x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
+        x = layers.MaxPool2D(pool_size=2)(x)
+        # x = layers.BatchNormalization()(x)
+        print(x.shape)
+
+        x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
+        x = layers.MaxPool2D(pool_size=2)(x)
+        # x = layers.BatchNormalization()(x)
+        print(x.shape)
+
+        x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
+        x = layers.MaxPool2D(pool_size=2)(x)
+        # x = layers.BatchNormalization()(x)
+        print(x.shape)
+
+        x = layers.Flatten()(x)
+        x = layers.Dense(320, activation="sigmoid", bias_regularizer=regularizers.l2(100))(x)
+        print(x.shape)
+
+        x = layers.Dense(10, activation="softmax", name="classifier_output")(x)
+
+        print(x.shape)
+        return x
+
+    def __create_temperature_branch(self, inputs):
+        x = layers.Conv2D(filters=12, kernel_size=2, activation="relu", data_format=self.__data_format)(inputs)
+        x = layers.MaxPool2D(pool_size=2)(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.Conv2D(filters=32, kernel_size=1, activation="relu")(x)
+        x = layers.BatchNormalization()(x)
+
+        x = layers.Flatten()(x)
+        x = layers.Dense(32, activation="sigmoid")(x)
+        x = layers.Dense(201, activation="softmax", name="temperature_output")(x)
+
+        return x
+
+
+if __name__ == "__main__":
+    summer_time = datetime(year=2017, month=8, day=1, hour=0)
+    fall_time = datetime(year=2017, month=10, day=1, hour=0)
+
+    net = NeuralNet(100, 100, CHANNELS_MODE)
+    data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, data_format=CHANNELS_MODE, input_per_epoch=2000)
+
+    model = net.create_model()
+
+    forever_loop = True
+    while forever_loop:
+        rad_features, class_label, temp_label = data_manager.get_numpy_arrays()
+        if rad_features is None:
+            print("Waiting...")
+            # time.sleep(5)
+            break
+
+        rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(rad_array=rad_features, classify_array=class_label,
+                                                                                                                                 temperature_array=temp_label, validate_percent=0.1)
+
+        model.fit(rad_features, {"classifier_output": class_label, "temperature_output": temp_label}, batch_size=BATCH_SIZE, epochs=5, validation_data=(rad_validate, {"classifier_output": class_validate, "temperature_output": temp_validate}))
+
+        # forever_loop = False
