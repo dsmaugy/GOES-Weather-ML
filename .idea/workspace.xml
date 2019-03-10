@@ -43,10 +43,14 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/neuralnet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-1431">
-              <caret line="209" column="28" lean-forward="true" selection-start-line="209" selection-start-column="28" selection-end-line="209" selection-end-column="28" />
+            <state relative-caret-position="358">
+              <caret line="360" selection-start-line="360" selection-end-line="363" selection-end-column="33" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
+                <element signature="e#6821#7001#0" />
+                <element signature="e#7078#8018#0" />
+                <element signature="e#8141#8782#0" />
+                <element signature="e#8810#11662#0" />
               </folding>
             </state>
           </provider>
@@ -63,7 +67,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>arizona</find>
       <find>nebraska</find>
       <find>maine</find>
       <find>southdak</find>
@@ -93,11 +96,13 @@
       <find>&quot;channels_First&quot;</find>
       <find>all_dates</find>
       <find>done getting</find>
+      <find>total_temp_label</find>
     </findStrings>
     <replaceStrings>
       <replace>all_dates[i]</replace>
       <replace>CONV_DATA_FORMAT</replace>
       <replace>self.__all_dates</replace>
+      <replace>temp_label</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -124,22 +129,32 @@
     <option name="height" value="1053" />
   </component>
   <component name="ProjectView">
-    <navigator proportions="" version="1">
+    <navigator currentView="Scope" currentSubView="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope" proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
+      <pane id="Scope">
+        <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
+          <expand>
+            <path>
+              <item name="GOES-Weather-ML" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+            </path>
+            <path>
+              <item name="GOES-Weather-ML" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name=".idea" type="9f88c78c:ScopeViewTreeModel$FileNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
       <pane id="ProjectPane">
         <subPane>
           <expand>
             <path>
               <item name="GOES-Weather-ML" type="b2602c69:ProjectViewProjectNode" />
               <item name="GOES-Weather-ML" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="GOES-Weather-ML" type="b2602c69:ProjectViewProjectNode" />
-              <item name="GOES-Weather-ML" type="462c0819:PsiDirectoryNode" />
-              <item name="config" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -404,7 +419,14 @@
       <option name="project" value="LOCAL" />
       <updated>1552086934291</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="added data augmentation">
+      <created>1552237362568</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1552237362568</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TodoView">
@@ -461,7 +483,8 @@
     <MESSAGE value="TRAINING WORKS" />
     <MESSAGE value="most updated net configuration" />
     <MESSAGE value="more changes to net configuration" />
-    <option name="LAST_COMMIT_MESSAGE" value="more changes to net configuration" />
+    <MESSAGE value="added data augmentation" />
+    <option name="LAST_COMMIT_MESSAGE" value="added data augmentation" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -705,12 +728,21 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/.idea/workspace.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-10210" />
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/neuralnet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-1431">
-          <caret line="209" column="28" lean-forward="true" selection-start-line="209" selection-start-column="28" selection-end-line="209" selection-end-column="28" />
+        <state relative-caret-position="358">
+          <caret line="360" selection-start-line="360" selection-end-line="363" selection-end-column="33" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#6821#7001#0" />
+            <element signature="e#7078#8018#0" />
+            <element signature="e#8141#8782#0" />
+            <element signature="e#8810#11662#0" />
           </folding>
         </state>
       </provider>

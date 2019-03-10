@@ -106,45 +106,57 @@ class TFDataManager:
         # shuffle the arrays, mainly for splitting up validation data
         rad_features, weather_labels = shuffle(rad_features, weather_labels)
 
-        original_size = rad_features.shape[0]
+        return rad_features, weather_labels
+    
+    @staticmethod
+    def split_weather_data(weather_array):
+        # transform the cloud + condition labels to one array
+        cloud_labels = weather_array[:, 1]
+        condition_labels = weather_array[:, 2]
+        
+        stack_clouds = np.stack(cloud_labels)
+        stack_condition = np.stack(condition_labels)
+        
+        labels_classifier = np.concatenate((stack_clouds, stack_condition), 1)
+        labels_temperature = np.stack(weather_array[:, 0])
+        
+        return labels_classifier, labels_temperature
+    
+    @staticmethod
+    def augment_data(rad_array, class_array, temp_array):
+        original_size = rad_array.shape[0]
+        print("-----------BEGIN DATA AUGMENTATION-------------")
+        print("Before augmentation", rad_array.shape)
 
         # flip images left-right
-        flipped_features = np.flip(rad_features[0 : int(original_size / 2)], (2, 3))
-        rad_features_augmented = np.concatenate((rad_features, flipped_features))
-        weather_labels_augmented = np.concatenate((weather_labels, weather_labels[0 : int(original_size / 2)]))
+        flipped_features = np.flip(rad_array[0 : int(original_size / 2)], (2, 3))
+        rad_features_augmented = np.concatenate((rad_array, flipped_features))
+        class_labels_augmented = np.concatenate((class_array, class_array[0 : int(original_size / 2)]))
+        temp_array_augmented = np.concatenate((temp_array, temp_array[0 : int(original_size / 2)]))
+        print("Flip augment rad", rad_features_augmented.shape)
+        print("Flip augment class + temp", class_labels_augmented.shape, temp_array_augmented.shape)
 
         # rotate images by 90 deg
-        rotated_features = np.rot90(rad_features[int(original_size / 2):], axes=(2, 3))
+        rotated_features = np.rot90(rad_array[int(original_size / 2):], axes=(2, 3))
         rad_features_augmented = np.concatenate((rad_features_augmented, rotated_features))
-        weather_labels_augmented = np.concatenate((weather_labels_augmented, weather_labels[int(original_size / 2):]))
+        class_labels_augmented = np.concatenate((class_labels_augmented, class_array[int(original_size / 2):]))
+        temp_array_augmented = np.concatenate((temp_array_augmented, temp_array[int(original_size / 2):]))
+        print("Rotate augment rad", rad_features_augmented.shape)
+        print("Rotate augment class + temp", class_labels_augmented.shape, temp_array_augmented.shape)
 
         # add gaussian noise
         noise = TFDataManager.add_gaussian_noise(rad_features_augmented)
         rad_features_augmented = np.concatenate((rad_features_augmented, noise))
-        weather_labels_augmented = np.concatenate((weather_labels_augmented, weather_labels_augmented))
+        class_labels_augmented = np.concatenate((class_labels_augmented, class_labels_augmented))
+        temp_array_augmented = np.concatenate((temp_array_augmented, temp_array_augmented))
+        print("Noise augment rad", rad_features_augmented.shape)
+        print("Noise augment class + temp", class_labels_augmented.shape, temp_array_augmented.shape)
 
-        # overwrite the existing arrays w/ augmentations
-        rad_features = rad_features_augmented
-        weather_labels = weather_labels_augmented
+        print("-----------END DATA AUGMENTATION-------------")
 
-        # normalize data between 0-1
-        rad_features = TFDataManager.normalize_radiance_array(rad_features)
 
-        # transform the cloud + condition labels to one array
-        cloud_labels = weather_labels[:, 1]
-        condition_labels = weather_labels[:, 2]
-
-        stack_clouds = np.stack(cloud_labels)
-        stack_condition = np.stack(condition_labels)
-
-        labels_classifier = np.concatenate((stack_clouds, stack_condition), 1)
-        labels_temperature = np.stack(weather_labels[:, 0])
-
-        if self.__data_format == "channels_last":
-            rad_features = rad_features.transpose([0, 2, 3, 1])
-
-        return rad_features, labels_classifier, labels_temperature
-
+        return rad_features_augmented, class_labels_augmented, temp_array_augmented
+            
     # def get_data_loop(self):
     #     if PICKLE_MODE:
     #         print("Using Pickled Date")
@@ -312,22 +324,40 @@ if __name__ == "__main__":
 
     model = net.create_model()
 
-    total_rad_features, total_class_label, total_temp_label = data_manager.get_numpy_arrays()
-
     cp_callback = tf.keras.callbacks.ModelCheckpoint("checkpoints/cp.cpkt", verbose=1)
 
     forever_loop = True
     while forever_loop:
-        if total_rad_features is None:
+        rad_features, weather_labels = data_manager.get_numpy_arrays()
+
+        print("Rad Features, Weather Labels:", rad_features.shape, weather_labels.shape)
+        if rad_features is None:
             print("Waiting...")
             # time.sleep(5)
             break
 
-        rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(rad_array=total_rad_features, classify_array=total_class_label,
-                                                                                                                                 temperature_array=total_temp_label, validate_percent=0.1)
+        # split weather data
+        class_label, temp_label = TFDataManager.split_weather_data(weather_labels)
 
-        print(total_rad_features.nbytes / 1000000, total_class_label.nbytes / 1000000, total_temp_label.nbytes / 1000000)
-        print(total_rad_features.shape, total_class_label.shape, total_temp_label.shape)
+        print("Class, temp (shape)", class_label.shape, temp_label.shape)
+
+        # split up validation data ONLY on non-augmented data
+        rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(rad_array=rad_features, classify_array=class_label,
+                                                                                                                                 temperature_array=temp_label, validate_percent=0.2)
+        print("Validation Size:", rad_validate.shape, class_validate.shape, temp_validate.shape)
+
+        # augment the data
+        rad_features, class_label, temp_label = TFDataManager.augment_data(rad_features, class_label, temp_label)
+
+        # normalize data between 0-1
+        rad_features = TFDataManager.normalize_radiance_array(rad_features)
+
+        # transpose if needed
+        rad_features = rad_features.transpose([0, 2, 3, 1])
+
+        print(rad_features.shape, class_label.shape, temp_label.shape)
+        print(rad_features.nbytes / 1000000, class_label.nbytes / 1000000, temp_label.nbytes / 1000000)
+
         # model.fit(rad_features, {"classifier_output": class_label, "temperature_output": temp_label}, batch_size=BATCH_SIZE, epochs=150, validation_data=(rad_validate, {"classifier_output": class_validate, "temperature_output": temp_validate})
         #           , verbose=2, callbacks=[cp_callback])
         #
