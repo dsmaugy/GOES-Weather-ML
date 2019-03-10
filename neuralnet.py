@@ -1,7 +1,6 @@
 import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras import regularizers
-from datagrabber import DataManager
 from datetime import timedelta, datetime
 import numpy as np
 import pickle
@@ -221,25 +220,25 @@ class NeuralNet:
         losses = {"classifier_output": "categorical_crossentropy",
                   "temperature_output": "categorical_crossentropy"}
 
-        tfmodel.compile(optimizer=tf.train.AdamOptimizer(), metrics=["categorical_accuracy"], loss=losses)
+        tfmodel.compile(optimizer=tf.keras.optimizers.Adam(), metrics=["categorical_accuracy"], loss=losses)
 
         return tfmodel
 
     def __create_classifier_branch(self, inputs):
         print(inputs.shape)
-        x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
+        x = layers.Conv2D(filters=128, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
         x = layers.MaxPool2D(pool_size=2)(x)
-        # x = layers.BatchNormalization()(x)
+        x = layers.BatchNormalization()(x)
         print(x.shape)
 
         x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
         x = layers.MaxPool2D(pool_size=2)(x)
-        # x = layers.BatchNormalization()(x)
+        x = layers.BatchNormalization()(x)
         print(x.shape)
 
         x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
         x = layers.MaxPool2D(pool_size=2)(x)
-        # x = layers.BatchNormalization()(x)
+        x = layers.BatchNormalization()(x)
         print(x.shape)
 
         x = layers.Flatten()(x)
@@ -252,16 +251,24 @@ class NeuralNet:
         return x
 
     def __create_temperature_branch(self, inputs):
-        x = layers.Conv2D(filters=12, kernel_size=2, activation="relu", data_format=self.__data_format)(inputs)
+        x = layers.Conv2D(filters=128, kernel_size=2, activation="relu", data_format=self.__data_format)(inputs)
         x = layers.MaxPool2D(pool_size=2)(x)
         x = layers.BatchNormalization()(x)
 
-        x = layers.Conv2D(filters=32, kernel_size=1, activation="relu")(x)
+        x = layers.Conv2D(filters=64, kernel_size=2, activation="relu")(x)
+        x = layers.MaxPool2D(pool_size=2)(x)
         x = layers.BatchNormalization()(x)
 
+
+        x = layers.Conv2D(filters=32, kernel_size=2, activation="relu")(x)
+        x = layers.MaxPool2D(pool_size=2)(x)
+        x = layers.BatchNormalization()(x)
+
+
         x = layers.Flatten()(x)
-        x = layers.Dense(400, activation="sigmoid")(x)
-        x = layers.Dense(300, activation="sigmoid")(x)
+        x = layers.Dense(400, activation="sigmoid", bias_regularizer=regularizers.l2(.01))(x)
+        x = layers.Dropout(0.5)(x)
+        x = layers.Dense(300, activation="sigmoid", bias_regularizer=regularizers.l2(.01))(x)
         x = layers.Dense(201, activation="softmax", name="temperature_output")(x)
 
         return x
@@ -272,21 +279,26 @@ if __name__ == "__main__":
     fall_time = datetime(year=2017, month=10, day=1, hour=0)
 
     net = NeuralNet(100, 100, CHANNELS_MODE)
-    data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, data_format=CHANNELS_MODE, input_per_epoch=2000)
+    data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, data_format=CHANNELS_MODE, input_per_epoch=3000)
 
     model = net.create_model()
 
+    total_rad_features, total_class_label, total_temp_label = data_manager.get_numpy_arrays()
+
+    cp_callback = tf.keras.callbacks.ModelCheckpoint("checkpoints/cp.cpkt", verbose=1)
+
     forever_loop = True
     while forever_loop:
-        rad_features, class_label, temp_label = data_manager.get_numpy_arrays()
-        if rad_features is None:
+        if total_rad_features is None:
             print("Waiting...")
             # time.sleep(5)
             break
+        total_rad_features, total_class_label, total_temp_label = shuffle(total_rad_features, total_class_label, total_temp_label)
+        rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(rad_array=total_rad_features, classify_array=total_class_label,
+                                                                                                                                 temperature_array=total_temp_label, validate_percent=0.1)
 
-        rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(rad_array=rad_features, classify_array=class_label,
-                                                                                                                                 temperature_array=temp_label, validate_percent=0.1)
+        model.fit(rad_features, {"classifier_output": class_label, "temperature_output": temp_label}, batch_size=BATCH_SIZE, epochs=150, validation_data=(rad_validate, {"classifier_output": class_validate, "temperature_output": temp_validate})
+                  , verbose=2, callbacks=[cp_callback])
 
-        model.fit(rad_features, {"classifier_output": class_label, "temperature_output": temp_label}, batch_size=BATCH_SIZE, epochs=1, validation_data=(rad_validate, {"classifier_output": class_validate, "temperature_output": temp_validate}))
-
-        # forever_loop = False
+        model.save("model.hd5")
+        forever_loop = False
