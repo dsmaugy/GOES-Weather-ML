@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="02cf5325-2bb3-446a-a662-5bfec6377796" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datagrabber.py" beforeDir="false" afterPath="$PROJECT_DIR$/datagrabber.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/neuralnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/neuralnet.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -20,8 +19,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gcstools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1860">
-              <caret line="135" column="70" selection-start-line="135" selection-start-column="70" selection-end-line="135" selection-end-column="70" />
+            <state relative-caret-position="263">
+              <caret line="51" lean-forward="true" selection-start-line="101" selection-start-column="14" selection-end-line="101" selection-end-column="85" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
               </folding>
@@ -29,11 +28,11 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/datagrabber.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="443">
-              <caret line="369" column="30" selection-start-line="369" selection-start-column="30" selection-end-line="369" selection-end-column="30" />
+            <state relative-caret-position="-5137">
+              <caret line="21" column="38" lean-forward="true" selection-start-line="21" selection-start-column="38" selection-end-line="21" selection-end-column="38" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
               </folding>
@@ -41,14 +40,13 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/neuralnet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="384">
-              <caret line="227" column="38" selection-start-line="227" selection-start-column="38" selection-end-line="227" selection-end-column="38" />
+            <state relative-caret-position="-1431">
+              <caret line="209" column="28" lean-forward="true" selection-start-line="209" selection-start-column="28" selection-end-line="209" selection-end-column="28" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
-                <element signature="e#5174#6633#0" />
               </folding>
             </state>
           </provider>
@@ -116,8 +114,8 @@
         <option value="$PROJECT_DIR$/test.py" />
         <option value="$PROJECT_DIR$/gcstools.py" />
         <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/neuralnet.py" />
         <option value="$PROJECT_DIR$/datagrabber.py" />
+        <option value="$PROJECT_DIR$/neuralnet.py" />
       </list>
     </option>
   </component>
@@ -392,7 +390,21 @@
       <option name="project" value="LOCAL" />
       <updated>1551927881350</updated>
     </task>
-    <option name="localTasksCounter" value="21" />
+    <task id="LOCAL-00021" summary="most updated net configuration">
+      <created>1552008029814</created>
+      <option name="number" value="00021" />
+      <option name="presentableId" value="LOCAL-00021" />
+      <option name="project" value="LOCAL" />
+      <updated>1552008029814</updated>
+    </task>
+    <task id="LOCAL-00022" summary="more changes to net configuration">
+      <created>1552086934291</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1552086934291</updated>
+    </task>
+    <option name="localTasksCounter" value="23" />
     <servers />
   </component>
   <component name="TodoView">
@@ -447,7 +459,9 @@
     <MESSAGE value="updated datagrabber date" />
     <MESSAGE value="changed the datagrabber loop conditon to infinite True loop, which is what it really is practically" />
     <MESSAGE value="TRAINING WORKS" />
-    <option name="LAST_COMMIT_MESSAGE" value="TRAINING WORKS" />
+    <MESSAGE value="most updated net configuration" />
+    <MESSAGE value="more changes to net configuration" />
+    <option name="LAST_COMMIT_MESSAGE" value="more changes to net configuration" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -636,13 +650,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file:///usr/local/lib/python3.5/dist-packages/tensorflow/python/keras/engine/training.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
-          <caret line="722" selection-start-line="722" selection-end-line="722" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/lib/python3.5/dist-packages/tensorflow/python/keras/engine/training_utils.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="563">
@@ -654,16 +661,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
           <caret line="222" column="4" selection-start-line="222" selection-start-column="4" selection-end-line="222" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/gcstools.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1860">
-          <caret line="135" column="70" selection-start-line="135" selection-start-column="70" selection-end-line="135" selection-end-column="70" />
-          <folding>
-            <element signature="e#0#29#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -681,23 +678,39 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/neuralnet.py">
+    <entry file="file://$PROJECT_DIR$/gcstools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="384">
-          <caret line="227" column="38" selection-start-line="227" selection-start-column="38" selection-end-line="227" selection-end-column="38" />
+        <state relative-caret-position="263">
+          <caret line="51" lean-forward="true" selection-start-line="101" selection-start-column="14" selection-end-line="101" selection-end-column="85" />
           <folding>
-            <element signature="e#0#23#0" expanded="true" />
-            <element signature="e#5174#6633#0" />
+            <element signature="e#0#29#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///usr/local/lib/python3.5/dist-packages/tensorflow/python/keras/engine/training.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="1119" column="6" selection-start-line="1119" selection-start-column="6" selection-end-line="1119" selection-end-column="6" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/datagrabber.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="443">
-          <caret line="369" column="30" selection-start-line="369" selection-start-column="30" selection-end-line="369" selection-end-column="30" />
+        <state relative-caret-position="-5137">
+          <caret line="21" column="38" lean-forward="true" selection-start-line="21" selection-start-column="38" selection-end-line="21" selection-end-column="38" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/neuralnet.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1431">
+          <caret line="209" column="28" lean-forward="true" selection-start-line="209" selection-start-column="28" selection-end-line="209" selection-end-column="28" />
+          <folding>
+            <element signature="e#0#23#0" expanded="true" />
           </folding>
         </state>
       </provider>

@@ -9,6 +9,7 @@ from os.path import isfile, join
 from math import floor
 import time
 from sklearn.utils import shuffle
+from sys import getsizeof
 
 PICKLE_MODE = False
 DATE_PICKLE_NAME = "datagrabberdate.pickle"
@@ -97,15 +98,37 @@ class TFDataManager:
         print("Done getting data for this epoch, here are the shapes:")
         print(weather_labels.shape)
         print(rad_features.shape)
-        
+
+        # crop them to be divisible by batch size
         rad_features = TFDataManager.format_numpy_arrays(rad_features)
         weather_labels = TFDataManager.format_numpy_arrays(weather_labels)
 
-        # normalize data between 0-1
-        rad_features = TFDataManager.normalize_radiance_array(rad_features)
-
         # shuffle the arrays, mainly for splitting up validation data
         rad_features, weather_labels = shuffle(rad_features, weather_labels)
+
+        original_size = rad_features.shape[0]
+
+        # flip images left-right
+        flipped_features = np.flip(rad_features[0 : int(original_size / 2)], (2, 3))
+        rad_features_augmented = np.concatenate((rad_features, flipped_features))
+        weather_labels_augmented = np.concatenate((weather_labels, weather_labels[0 : int(original_size / 2)]))
+
+        # rotate images by 90 deg
+        rotated_features = np.rot90(rad_features[int(original_size / 2):], axes=(2, 3))
+        rad_features_augmented = np.concatenate((rad_features_augmented, rotated_features))
+        weather_labels_augmented = np.concatenate((weather_labels_augmented, weather_labels[int(original_size / 2):]))
+
+        # add gaussian noise
+        noise = TFDataManager.add_gaussian_noise(rad_features_augmented)
+        rad_features_augmented = np.concatenate((rad_features_augmented, noise))
+        weather_labels_augmented = np.concatenate((weather_labels_augmented, weather_labels_augmented))
+
+        # overwrite the existing arrays w/ augmentations
+        rad_features = rad_features_augmented
+        weather_labels = weather_labels_augmented
+
+        # normalize data between 0-1
+        rad_features = TFDataManager.normalize_radiance_array(rad_features)
 
         # transform the cloud + condition labels to one array
         cloud_labels = weather_labels[:, 1]
@@ -154,7 +177,13 @@ class TFDataManager:
     #         data_retriever.pickle_date()
     #         print("Sucesfully pickled current date")
     #         print("Done with 1 hour iteration... moving on to ", data_date)
-    
+
+
+
+    @staticmethod
+    def add_gaussian_noise(array):
+        return array + np.random.normal(0, 1, size=array.shape)
+
     @staticmethod
     def format_numpy_arrays(array):
         size_to_crop_to = floor(array.shape[0] / BATCH_SIZE) * BATCH_SIZE
@@ -279,7 +308,7 @@ if __name__ == "__main__":
     fall_time = datetime(year=2017, month=10, day=1, hour=0)
 
     net = NeuralNet(100, 100, CHANNELS_MODE)
-    data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, data_format=CHANNELS_MODE, input_per_epoch=3000)
+    data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, data_format=CHANNELS_MODE, input_per_epoch=500)
 
     model = net.create_model()
 
@@ -293,12 +322,14 @@ if __name__ == "__main__":
             print("Waiting...")
             # time.sleep(5)
             break
-        total_rad_features, total_class_label, total_temp_label = shuffle(total_rad_features, total_class_label, total_temp_label)
+
         rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(rad_array=total_rad_features, classify_array=total_class_label,
                                                                                                                                  temperature_array=total_temp_label, validate_percent=0.1)
 
-        model.fit(rad_features, {"classifier_output": class_label, "temperature_output": temp_label}, batch_size=BATCH_SIZE, epochs=150, validation_data=(rad_validate, {"classifier_output": class_validate, "temperature_output": temp_validate})
-                  , verbose=2, callbacks=[cp_callback])
-
-        model.save("model.hd5")
+        print(total_rad_features.nbytes / 1000000, total_class_label.nbytes / 1000000, total_temp_label.nbytes / 1000000)
+        print(total_rad_features.shape, total_class_label.shape, total_temp_label.shape)
+        # model.fit(rad_features, {"classifier_output": class_label, "temperature_output": temp_label}, batch_size=BATCH_SIZE, epochs=150, validation_data=(rad_validate, {"classifier_output": class_validate, "temperature_output": temp_validate})
+        #           , verbose=2, callbacks=[cp_callback])
+        #
+        # model.save("model.hd5")
         forever_loop = False
