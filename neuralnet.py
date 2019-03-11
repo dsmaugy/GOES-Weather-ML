@@ -15,7 +15,7 @@ PICKLE_MODE = False
 DATE_PICKLE_NAME = "datagrabberdate.pickle"
 CHANNELS_MODE = "channels_last"
 
-BATCH_SIZE = 32
+BATCH_SIZE = 16
 MIN_RAD = 1
 MAX_RAD = 140
 
@@ -93,7 +93,7 @@ class TFDataManager:
                 data_collected = True
 
         if rad_features is None:
-            return None, None, None  # haha
+            return None, None  # haha
 
         print("Done getting data for this epoch, here are the shapes:")
         print(weather_labels.shape)
@@ -113,12 +113,13 @@ class TFDataManager:
         # transform the cloud + condition labels to one array
         cloud_labels = weather_array[:, 1]
         condition_labels = weather_array[:, 2]
+        temp_labels = weather_array[:, 0]
         
         stack_clouds = np.stack(cloud_labels)
         stack_condition = np.stack(condition_labels)
-        
+
         labels_classifier = np.concatenate((stack_clouds, stack_condition), 1)
-        labels_temperature = np.stack(weather_array[:, 0])
+        labels_temperature = np.stack(temp_labels)
         
         return labels_classifier, labels_temperature
     
@@ -253,113 +254,165 @@ class NeuralNet:
         else:
             inputs = tf.keras.Input(shape=(4, self.__height, self.__width))
 
-        classifier_branch = self.__create_classifier_branch(inputs)
+        cloud_classifier_branch = self.__create_cloud_classifier_branch(inputs)
+        condition_classifier_branch = self.__create_condition_classifier_branch(inputs)
         temperature_branch = self.__create_temperature_branch(inputs)
 
-        tfmodel = tf.keras.Model(inputs=inputs, outputs=[classifier_branch, temperature_branch])
+        tfmodel = tf.keras.Model(inputs=inputs, outputs=[cloud_classifier_branch, condition_classifier_branch, temperature_branch])
 
-        losses = {"classifier_output": "categorical_crossentropy",
+        losses = {"cloud_classifier": "categorical_crossentropy",
+                  "condition_classifier": "binary_crossentropy",
                   "temperature_output": "categorical_crossentropy"}
 
-        tfmodel.compile(optimizer=tf.keras.optimizers.Adam(), metrics=["categorical_accuracy"], loss=losses)
+        metrics = {"cloud_classifier": "accuracy",
+                   "condition_classifier": "accuracy",
+                   "temperature_output": "accuracy"}
+
+        tfmodel.compile(optimizer=tf.keras.optimizers.Adam(), metrics=metrics, loss=losses)
 
         return tfmodel
 
-    def __create_classifier_branch(self, inputs):
+    def __create_condition_classifier_branch(self, inputs):
         print(inputs.shape)
-        x = layers.Conv2D(filters=128, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
-        x = layers.MaxPool2D(pool_size=2)(x)
+        x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
         x = layers.BatchNormalization()(x)
+        x = layers.MaxPool2D(pool_size=2)(x)
         print(x.shape)
 
         x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
-        x = layers.MaxPool2D(pool_size=2)(x)
         x = layers.BatchNormalization()(x)
+        x = layers.MaxPool2D(pool_size=2)(x)
         print(x.shape)
 
         x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
-        x = layers.MaxPool2D(pool_size=2)(x)
         x = layers.BatchNormalization()(x)
+        x = layers.MaxPool2D(pool_size=2)(x)
         print(x.shape)
 
         x = layers.Flatten()(x)
-        x = layers.Dense(320, activation="sigmoid", bias_regularizer=regularizers.l2(.01))(x)
+        x = layers.Dense(320, activation="relu", bias_regularizer=regularizers.l2(.01))(x)
         print(x.shape)
+        x = layers.Dropout(0.1)(x)
 
-        x = layers.Dense(10, activation="softmax", name="classifier_output")(x)
+        x = layers.Dense(4, activation="sigmoid", name="condition_classifier")(x)
 
         print(x.shape)
         return x
 
-    def __create_temperature_branch(self, inputs):
-        x = layers.Conv2D(filters=128, kernel_size=2, activation="relu", data_format=self.__data_format)(inputs)
-        x = layers.MaxPool2D(pool_size=2)(x)
+    def __create_cloud_classifier_branch(self, inputs):
+        print(inputs.shape)
+        x = layers.Conv2D(filters=12, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
         x = layers.BatchNormalization()(x)
-
-        x = layers.Conv2D(filters=64, kernel_size=2, activation="relu")(x)
         x = layers.MaxPool2D(pool_size=2)(x)
-        x = layers.BatchNormalization()(x)
+        print(x.shape)
 
-
-        x = layers.Conv2D(filters=32, kernel_size=2, activation="relu")(x)
-        x = layers.MaxPool2D(pool_size=2)(x)
-        x = layers.BatchNormalization()(x)
-
+        # x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
+        # x = layers.BatchNormalization()(x)
+        # x = layers.MaxPool2D(pool_size=2)(x)
+        # print(x.shape)
+        #
+        # x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
+        # x = layers.BatchNormalization()(x)
+        # x = layers.MaxPool2D(pool_size=2)(x)
+        # print(x.shape)
 
         x = layers.Flatten()(x)
-        x = layers.Dense(400, activation="sigmoid", bias_regularizer=regularizers.l2(.01))(x)
+        x = layers.Dense(50, activation="relu")(x)
         x = layers.Dropout(0.5)(x)
-        x = layers.Dense(300, activation="sigmoid", bias_regularizer=regularizers.l2(.01))(x)
+        print(x.shape)
+
+        x = layers.Dense(6, activation="softmax", name="cloud_classifier")(x)
+        print(x.shape)
+
+        return x
+
+    def __create_temperature_branch(self, inputs):
+        x = layers.Conv2D(filters=128, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
+        x = layers.BatchNormalization()(x)
+        x = layers.MaxPool2D(pool_size=2)(x)
+
+        x = layers.Conv2D(filters=64, kernel_size=2, activation="relu", data_format=self.__data_format)(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.MaxPool2D(pool_size=2)(x)
+
+        x = layers.Conv2D(filters=32, kernel_size=2, activation="relu", data_format=self.__data_format)(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.MaxPool2D(pool_size=2)(x)
+
+        x = layers.Flatten()(x)
+        x = layers.Dense(300, activation="relu", bias_regularizer=regularizers.l2(.05))(x)
+        x = layers.Dropout(0.5)(x)
         x = layers.Dense(201, activation="softmax", name="temperature_output")(x)
 
         return x
 
+class MainDriver:
+    def train(self):
+        summer_time = datetime(year=2017, month=8, day=1, hour=0)
+        fall_time = datetime(year=2017, month=10, day=1, hour=0)
+
+        net = NeuralNet(100, 100, CHANNELS_MODE)
+        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, data_format=CHANNELS_MODE, input_per_epoch=1000)
+
+        model = net.create_model()
+
+        cp_callback = tf.keras.callbacks.ModelCheckpoint("checkpoints/cp.cpkt", verbose=1)
+
+        forever_loop = True
+        while forever_loop:
+            rad_features, weather_labels = data_manager.get_numpy_arrays()
+
+            print("Rad Features, Weather Labels:", rad_features.shape, weather_labels.shape)
+            if rad_features is None:
+                print("Waiting...")
+                # time.sleep(5)
+                break
+
+            # split weather data
+            class_label, temp_label = TFDataManager.split_weather_data(weather_labels)
+
+            print("Class, temp (shape)", class_label.shape, temp_label.shape)
+
+            # split up validation data ONLY on non-augmented data
+            rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(rad_array=rad_features, classify_array=class_label,
+                                                                                                                                     temperature_array=temp_label, validate_percent=0.2)
+            print("Validation Size:", rad_validate.shape, class_validate.shape, temp_validate.shape)
+
+            # augment the data
+            rad_features, class_label, temp_label = TFDataManager.augment_data(rad_features, class_label, temp_label)
+
+            # normalize data between 0-1
+            rad_features = TFDataManager.normalize_radiance_array(rad_features)
+
+            # transpose if needed
+            rad_features = rad_features.transpose([0, 2, 3, 1])
+            rad_validate = rad_validate.transpose([0, 2, 3, 1])
+
+            print(rad_features.shape, class_label.shape, temp_label.shape)
+            print(rad_features.nbytes / 1000000, class_label.nbytes / 1000000, temp_label.nbytes / 1000000)
+
+            # split up the weather data, both labels + validation labels
+            clouds_label = class_label[:, 0:6]
+            conditions_label = class_label[:, 6:10]
+
+            clouds_validate = class_validate[:, 0:6]
+            conditions_validate = class_validate[:, 6:10]
+
+            outputs = {"cloud_classifier": clouds_label,
+                       "condition_classifier": conditions_label,
+                       "temperature_output": temp_label}
+
+            weather_validation_set = {"cloud_classifier": clouds_validate,
+                       "condition_classifier": conditions_validate,
+                       "temperature_output": temp_validate}
+
+            model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=20, validation_data=(rad_validate, weather_validation_set)
+                      , verbose=1, callbacks=[cp_callback])
+
+            model.save("model.hd5")
+            forever_loop = True
 
 if __name__ == "__main__":
-    summer_time = datetime(year=2017, month=8, day=1, hour=0)
-    fall_time = datetime(year=2017, month=10, day=1, hour=0)
+    main = MainDriver()
+    main.train()
 
-    net = NeuralNet(100, 100, CHANNELS_MODE)
-    data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, data_format=CHANNELS_MODE, input_per_epoch=500)
-
-    model = net.create_model()
-
-    cp_callback = tf.keras.callbacks.ModelCheckpoint("checkpoints/cp.cpkt", verbose=1)
-
-    forever_loop = True
-    while forever_loop:
-        rad_features, weather_labels = data_manager.get_numpy_arrays()
-
-        print("Rad Features, Weather Labels:", rad_features.shape, weather_labels.shape)
-        if rad_features is None:
-            print("Waiting...")
-            # time.sleep(5)
-            break
-
-        # split weather data
-        class_label, temp_label = TFDataManager.split_weather_data(weather_labels)
-
-        print("Class, temp (shape)", class_label.shape, temp_label.shape)
-
-        # split up validation data ONLY on non-augmented data
-        rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(rad_array=rad_features, classify_array=class_label,
-                                                                                                                                 temperature_array=temp_label, validate_percent=0.2)
-        print("Validation Size:", rad_validate.shape, class_validate.shape, temp_validate.shape)
-
-        # augment the data
-        rad_features, class_label, temp_label = TFDataManager.augment_data(rad_features, class_label, temp_label)
-
-        # normalize data between 0-1
-        rad_features = TFDataManager.normalize_radiance_array(rad_features)
-
-        # transpose if needed
-        rad_features = rad_features.transpose([0, 2, 3, 1])
-
-        print(rad_features.shape, class_label.shape, temp_label.shape)
-        print(rad_features.nbytes / 1000000, class_label.nbytes / 1000000, temp_label.nbytes / 1000000)
-
-        # model.fit(rad_features, {"classifier_output": class_label, "temperature_output": temp_label}, batch_size=BATCH_SIZE, epochs=150, validation_data=(rad_validate, {"classifier_output": class_validate, "temperature_output": temp_validate})
-        #           , verbose=2, callbacks=[cp_callback])
-        #
-        # model.save("model.hd5")
-        forever_loop = False
