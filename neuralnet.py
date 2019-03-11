@@ -25,9 +25,9 @@ MAX_RAD = 140
 # returns tuple of 3 numpy arrays, radiance input data, weather classifier data, temperature data
 '''
 class TFDataManager:
-    def __init__(self, summer_date, fall_date, data_format, input_per_epoch):
+    def __init__(self, summer_date, fall_date, winter_date, spring_date, data_format, input_per_epoch):
         self.__file_already_processed_list = []
-        self.__all_dates = [summer_date, fall_date]
+        self.__all_dates = [summer_date, fall_date, winter_date, spring_date]
         self.__data_format = data_format
         self.__input_per_epoch = input_per_epoch
 
@@ -350,9 +350,11 @@ class MainDriver:
     def train(self):
         summer_time = datetime(year=2017, month=8, day=1, hour=0)
         fall_time = datetime(year=2017, month=10, day=1, hour=0)
+        winter_time = datetime(year=2018, month=2, day=1, hour=0)
+        spring_time = datetime(year=2018, month=6, day=1, hour=0)
 
         net = NeuralNet(100, 100, CHANNELS_MODE)
-        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, data_format=CHANNELS_MODE, input_per_epoch=1000)
+        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time, spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=1000)
 
         model = net.create_model()
 
@@ -406,7 +408,7 @@ class MainDriver:
                        "condition_classifier": conditions_validate,
                        "temperature_output": temp_validate}
 
-            model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=20, validation_data=(rad_validate, weather_validation_set)
+            model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=10, validation_data=(rad_validate, weather_validation_set)
                       , verbose=1, callbacks=[cp_callback])
 
             model.save("model.hd5")
