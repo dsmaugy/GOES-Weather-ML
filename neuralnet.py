@@ -130,18 +130,18 @@ class TFDataManager:
         print("Before augmentation", rad_array.shape)
 
         # flip images left-right
-        flipped_features = np.flip(rad_array[0 : int(original_size / 2)], (2, 3))
+        flipped_features = np.flip(rad_array, (2, 3))
         rad_features_augmented = np.concatenate((rad_array, flipped_features))
-        class_labels_augmented = np.concatenate((class_array, class_array[0 : int(original_size / 2)]))
-        temp_array_augmented = np.concatenate((temp_array, temp_array[0 : int(original_size / 2)]))
+        class_labels_augmented = np.concatenate((class_array, class_array))
+        temp_array_augmented = np.concatenate((temp_array, temp_array))
         print("Flip augment rad", rad_features_augmented.shape)
         print("Flip augment class + temp", class_labels_augmented.shape, temp_array_augmented.shape)
 
         # rotate images by 90 deg
-        rotated_features = np.rot90(rad_array[int(original_size / 2):], axes=(2, 3))
+        rotated_features = np.rot90(rad_array, axes=(2, 3))
         rad_features_augmented = np.concatenate((rad_features_augmented, rotated_features))
-        class_labels_augmented = np.concatenate((class_labels_augmented, class_array[int(original_size / 2):]))
-        temp_array_augmented = np.concatenate((temp_array_augmented, temp_array[int(original_size / 2):]))
+        class_labels_augmented = np.concatenate((class_labels_augmented, class_array))
+        temp_array_augmented = np.concatenate((temp_array_augmented, temp_array))
         print("Rotate augment rad", rad_features_augmented.shape)
         print("Rotate augment class + temp", class_labels_augmented.shape, temp_array_augmented.shape)
 
@@ -359,7 +359,7 @@ class MainDriver:
         spring_time = datetime(year=2018, month=6, day=1, hour=0)
 
         net = NeuralNet(100, 100, CHANNELS_MODE)
-        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time, spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=1000)
+        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time, spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=500)
 
         model = net.create_model()
 
@@ -392,7 +392,7 @@ class MainDriver:
             # normalize data between 0-1
             rad_features = TFDataManager.normalize_radiance_array(rad_features)
 
-            # transpose if needed
+            # transpose
             rad_features = rad_features.transpose([0, 2, 3, 1])
             rad_validate = rad_validate.transpose([0, 2, 3, 1])
 
