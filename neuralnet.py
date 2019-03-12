@@ -153,7 +153,7 @@ class TFDataManager:
         print("Noise augment rad", rad_features_augmented.shape)
         print("Noise augment class + temp", class_labels_augmented.shape, temp_array_augmented.shape)
 
-        print("-----------END DATA AUGMENTATION-------------")
+        print("-----------END DATA AUGMENTATION--------------")
 
 
         return rad_features_augmented, class_labels_augmented, temp_array_augmented
@@ -241,6 +241,7 @@ class TFDataManager:
 
         return rad_array, classify_array, temperature_array, rad_validate, classify_validate, temperature_validate
 
+
 class NeuralNet:
     
     def __init__(self, width, height, data_format):
@@ -260,13 +261,13 @@ class NeuralNet:
 
         tfmodel = tf.keras.Model(inputs=inputs, outputs=[cloud_classifier_branch, condition_classifier_branch, temperature_branch])
 
-        losses = {"cloud_classifier": "categorical_crossentropy",
-                  "condition_classifier": "binary_crossentropy",
-                  "temperature_output": "categorical_crossentropy"}
+        losses = {"cloud": "categorical_crossentropy",
+                  "condition": "binary_crossentropy",
+                  "temp": "categorical_crossentropy"}
 
-        metrics = {"cloud_classifier": "accuracy",
-                   "condition_classifier": "accuracy",
-                   "temperature_output": "accuracy"}
+        metrics = {"cloud": "accuracy",
+                   "condition": "accuracy",
+                   "temp": "accuracy"}
 
         tfmodel.compile(optimizer=tf.keras.optimizers.Adam(), metrics=metrics, loss=losses)
 
@@ -294,55 +295,59 @@ class NeuralNet:
         print(x.shape)
         x = layers.Dropout(0.1)(x)
 
-        x = layers.Dense(4, activation="sigmoid", name="condition_classifier")(x)
+        x = layers.Dense(4, activation="sigmoid", name="condition")(x)
 
         print(x.shape)
         return x
 
     def __create_cloud_classifier_branch(self, inputs):
         print(inputs.shape)
-        x = layers.Conv2D(filters=12, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
+        x = layers.Conv2D(filters=128, kernel_size=10, activation="relu", data_format=self.__data_format)(inputs)
+        x = layers.BatchNormalization()(x)
+        x = layers.MaxPool2D(pool_size=2)(x)
+        x = layers.Dropout(0.2)(x)
+        print(x.shape)
+
+        x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
+        x = layers.BatchNormalization()(x)
+        x = layers.MaxPool2D(pool_size=2)(x)
+        x = layers.Dropout(0.2)(x)
+        print(x.shape)
+
+        x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
         print(x.shape)
 
-        # x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
-        # x = layers.BatchNormalization()(x)
-        # x = layers.MaxPool2D(pool_size=2)(x)
-        # print(x.shape)
-        #
-        # x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
-        # x = layers.BatchNormalization()(x)
-        # x = layers.MaxPool2D(pool_size=2)(x)
-        # print(x.shape)
-
         x = layers.Flatten()(x)
         x = layers.Dense(50, activation="relu")(x)
-        x = layers.Dropout(0.5)(x)
+        x = layers.Dropout(0.4)(x)
         print(x.shape)
 
-        x = layers.Dense(6, activation="softmax", name="cloud_classifier")(x)
+        x = layers.Dense(6, activation="softmax", name="cloud")(x)
         print(x.shape)
 
         return x
 
     def __create_temperature_branch(self, inputs):
-        x = layers.Conv2D(filters=128, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
+        x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
+        x = layers.Dropout(0.4)(x)
 
-        x = layers.Conv2D(filters=64, kernel_size=2, activation="relu", data_format=self.__data_format)(x)
+        x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
+        x = layers.Dropout(0.4)(x)
 
-        x = layers.Conv2D(filters=32, kernel_size=2, activation="relu", data_format=self.__data_format)(x)
+        x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
 
         x = layers.Flatten()(x)
-        x = layers.Dense(300, activation="relu", bias_regularizer=regularizers.l2(.05))(x)
+        x = layers.Dense(300, activation="relu", bias_regularizer=regularizers.l2(.15))(x)
         x = layers.Dropout(0.5)(x)
-        x = layers.Dense(201, activation="softmax", name="temperature_output")(x)
+        x = layers.Dense(201, activation="softmax", name="temp")(x)
 
         return x
 
@@ -362,11 +367,12 @@ class MainDriver:
         while forever_loop:
             rad_features, weather_labels = data_manager.get_numpy_arrays()
 
-            print("Rad Features, Weather Labels:", rad_features.shape, weather_labels.shape)
             if rad_features is None:
                 print("Waiting...")
                 # time.sleep(5)
                 break
+
+            print("Rad Features, Weather Labels:", rad_features.shape, weather_labels.shape)
 
             # split weather data
             class_label, temp_label = TFDataManager.split_weather_data(weather_labels)
@@ -375,7 +381,7 @@ class MainDriver:
 
             # split up validation data ONLY on non-augmented data
             rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(rad_array=rad_features, classify_array=class_label,
-                                                                                                                                     temperature_array=temp_label, validate_percent=0.2)
+                                                                                                                                     temperature_array=temp_label, validate_percent=0.4)
             print("Validation Size:", rad_validate.shape, class_validate.shape, temp_validate.shape)
 
             # augment the data
@@ -398,21 +404,26 @@ class MainDriver:
             clouds_validate = class_validate[:, 0:6]
             conditions_validate = class_validate[:, 6:10]
 
-            outputs = {"cloud_classifier": clouds_label,
-                       "condition_classifier": conditions_label,
-                       "temperature_output": temp_label}
+            outputs = {"cloud": clouds_label,
+                       "condition": conditions_label,
+                       "temp": temp_label}
 
-            weather_validation_set = {"cloud_classifier": clouds_validate,
-                       "condition_classifier": conditions_validate,
-                       "temperature_output": temp_validate}
+            weather_validation_set = {"cloud": clouds_validate,
+                       "condition": conditions_validate,
+                       "temp": temp_validate}
 
-            model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=20, validation_data=(rad_validate, weather_validation_set)
+            model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=10, validation_data=(rad_validate, weather_validation_set)
                       , verbose=1, callbacks=[cp_callback])
 
             model.save("model.hd5")
             forever_loop = True
 
 if __name__ == "__main__":
+    # only if running with GPU
+    config = tf.ConfigProto()
+    config.gpu_options.allow_growth = True
+    tf.Session(config=config)
+
     main = MainDriver()
     main.train()
 
