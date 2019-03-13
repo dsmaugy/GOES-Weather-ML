@@ -415,7 +415,7 @@ class MainDriver:
                        "condition": conditions_validate,
                        "temp": temp_validate}
 
-            history = model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=1, validation_data=(rad_validate, weather_validation_set)
+            history = model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=5, validation_data=(rad_validate, weather_validation_set)
                       , verbose=1, callbacks=[cp_callback])
 
             model.save("model.hd5")
