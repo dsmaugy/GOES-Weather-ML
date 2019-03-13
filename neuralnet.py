@@ -352,6 +352,7 @@ class NeuralNet:
 
         return x
 
+
 class MainDriver:
     def train(self):
         summer_time = datetime(year=2017, month=8, day=1, hour=0)
@@ -360,7 +361,7 @@ class MainDriver:
         spring_time = datetime(year=2018, month=6, day=1, hour=0)
 
         net = NeuralNet(100, 100, CHANNELS_MODE)
-        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time, spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=500)
+        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time, spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=1000)
 
         model = net.create_model()
 
@@ -415,82 +416,84 @@ class MainDriver:
                        "condition": conditions_validate,
                        "temp": temp_validate}
 
-            history = model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=5, validation_data=(rad_validate, weather_validation_set)
+            history = model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=20, validation_data=(rad_validate, weather_validation_set)
                       , verbose=1, callbacks=[cp_callback])
 
             model.save("model.hd5")
 
             print(history.history.keys())
-            # clouds
-            # Plot training & validation accuracy values
-            plt.plot(history.history['cloud_acc'])
-            plt.plot(history.history['val_cloud_acc'])
-            plt.title('Cloud Model accuracy')
-            plt.ylabel('Accuracy')
-            plt.xlabel('Epoch')
-            plt.legend(['Train', 'Test'], loc='upper left')
-
-            plt.savefig("cloud_accuracy_plot.png")
-            plt.clf()
-
-            # Plot training & validation loss values
-            plt.plot(history.history['cloud_loss'])
-            plt.plot(history.history['val_cloud_loss'])
-            plt.title('Cloud Model loss')
-            plt.ylabel('Loss')
-            plt.xlabel('Epoch')
-            plt.legend(['Train', 'Test'], loc='upper left')
-
-            plt.savefig("cloud_loss_plot.png")
-            plt.clf()
-
-            # conditions
-            # Plot training & validation accuracy values
-            plt.plot(history.history['condition_acc'])
-            plt.plot(history.history['val_condition_acc'])
-            plt.title('Condition Model accuracy')
-            plt.ylabel('Accuracy')
-            plt.xlabel('Epoch')
-            plt.legend(['Train', 'Test'], loc='upper left')
-
-            plt.savefig("condition_accuracy_plot.png")
-            plt.clf()
-
-            # Plot training & validation loss values
-            plt.plot(history.history['condition_loss'])
-            plt.plot(history.history['val_condition_loss'])
-            plt.title('Condition Model loss')
-            plt.ylabel('Loss')
-            plt.xlabel('Epoch')
-            plt.legend(['Train', 'Test'], loc='upper left')
-
-            plt.savefig("condition_loss_plot.png")
-            plt.clf()
-
-            # temperature
-            # Plot training & validation accuracy values
-            plt.plot(history.history['temp_acc'])
-            plt.plot(history.history['val_temp_acc'])
-            plt.title('Temperature Model accuracy')
-            plt.ylabel('Accuracy')
-            plt.xlabel('Epoch')
-            plt.legend(['Train', 'Test'], loc='upper left')
-
-            plt.savefig("temperature_accuracy_plot.png")
-            plt.clf()
-
-            # Plot training & validation loss values
-            plt.plot(history.history['temp_loss'])
-            plt.plot(history.history['val_temp_loss'])
-            plt.title('Temperature Model loss')
-            plt.ylabel('Loss')
-            plt.xlabel('Epoch')
-            plt.legend(['Train', 'Test'], loc='upper left')
-
-            plt.savefig("temperature_loss_plot.png")
-            plt.clf()
 
             forever_loop = True
+
+    def save_graphs(self, history):
+        # clouds
+        # Plot training & validation accuracy values
+        plt.plot(history.history['cloud_acc'])
+        plt.plot(history.history['val_cloud_acc'])
+        plt.title('Cloud Model accuracy')
+        plt.ylabel('Accuracy')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Test'], loc='upper left')
+
+        plt.savefig("cloud_accuracy_plot.png")
+        plt.clf()
+
+        # Plot training & validation loss values
+        plt.plot(history.history['cloud_loss'])
+        plt.plot(history.history['val_cloud_loss'])
+        plt.title('Cloud Model loss')
+        plt.ylabel('Loss')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Test'], loc='upper left')
+
+        plt.savefig("cloud_loss_plot.png")
+        plt.clf()
+
+        # conditions
+        # Plot training & validation accuracy values
+        plt.plot(history.history['condition_acc'])
+        plt.plot(history.history['val_condition_acc'])
+        plt.title('Condition Model accuracy')
+        plt.ylabel('Accuracy')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Test'], loc='upper left')
+
+        plt.savefig("condition_accuracy_plot.png")
+        plt.clf()
+
+        # Plot training & validation loss values
+        plt.plot(history.history['condition_loss'])
+        plt.plot(history.history['val_condition_loss'])
+        plt.title('Condition Model loss')
+        plt.ylabel('Loss')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Test'], loc='upper left')
+
+        plt.savefig("condition_loss_plot.png")
+        plt.clf()
+
+        # temperature
+        # Plot training & validation accuracy values
+        plt.plot(history.history['temp_acc'])
+        plt.plot(history.history['val_temp_acc'])
+        plt.title('Temperature Model accuracy')
+        plt.ylabel('Accuracy')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Test'], loc='upper left')
+
+        plt.savefig("temperature_accuracy_plot.png")
+        plt.clf()
+
+        # Plot training & validation loss values
+        plt.plot(history.history['temp_loss'])
+        plt.plot(history.history['val_temp_loss'])
+        plt.title('Temperature Model loss')
+        plt.ylabel('Loss')
+        plt.xlabel('Epoch')
+        plt.legend(['Train', 'Test'], loc='upper left')
+
+        plt.savefig("temperature_loss_plot.png")
+        plt.clf()
 
 if __name__ == "__main__":
     # only if running with GPU
