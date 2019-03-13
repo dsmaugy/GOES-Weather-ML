@@ -6,7 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="02cf5325-2bb3-446a-a662-5bfec6377796" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/neuralnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/neuralnet.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -62,8 +61,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/neuralnet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="810">
-              <caret line="478" column="47" selection-start-line="478" selection-start-column="47" selection-end-line="478" selection-end-column="47" />
+            <state relative-caret-position="540">
+              <caret line="475" lean-forward="true" selection-start-line="475" selection-end-line="475" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -524,7 +523,21 @@
       <option name="project" value="LOCAL" />
       <updated>1552495434113</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="fixed graphs once again">
+      <created>1552497824771</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1552497824771</updated>
+    </task>
+    <task id="LOCAL-00031" summary="one last time">
+      <created>1552499911784</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1552499911784</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TodoView">
@@ -537,7 +550,7 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-1" width="1920" height="1054" extended-state="6" />
+    <frame x="0" y="-1" width="1920" height="1054" extended-state="7" />
     <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14865577" />
@@ -570,8 +583,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="restructured the organization, 3 different classes to interact with the data&#10;&#10;curently working on finalizing the function to convert the data into numpy arrays to feed into TF" />
-    <MESSAGE value="first attempt at running on compute engine&#10;data collection should loop and save the numpy arrays" />
     <MESSAGE value="fixed subscriptable datetime error" />
     <MESSAGE value="added check if no data for temp or sky" />
     <MESSAGE value="fixed naming numpy files" />
@@ -595,7 +606,9 @@
     <MESSAGE value="fixed plots" />
     <MESSAGE value="fixed plots w/ epoch" />
     <MESSAGE value="print history" />
-    <option name="LAST_COMMIT_MESSAGE" value="print history" />
+    <MESSAGE value="fixed graphs once again" />
+    <MESSAGE value="one last time" />
+    <option name="LAST_COMMIT_MESSAGE" value="one last time" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -726,8 +739,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/neuralnet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="810">
-          <caret line="478" column="47" selection-start-line="478" selection-start-column="47" selection-end-line="478" selection-end-column="47" />
+        <state relative-caret-position="540">
+          <caret line="475" lean-forward="true" selection-start-line="475" selection-end-line="475" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>

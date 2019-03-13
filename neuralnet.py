@@ -431,6 +431,7 @@ class MainDriver:
             plt.legend(['Train', 'Test'], loc='upper left')
 
             plt.savefig("cloud_accuracy_plot.png")
+            plt.clf()
 
             # Plot training & validation loss values
             plt.plot(history.history['cloud_loss'])
@@ -441,6 +442,7 @@ class MainDriver:
             plt.legend(['Train', 'Test'], loc='upper left')
 
             plt.savefig("cloud_loss_plot.png")
+            plt.clf()
 
             # conditions
             # Plot training & validation accuracy values
@@ -452,6 +454,7 @@ class MainDriver:
             plt.legend(['Train', 'Test'], loc='upper left')
 
             plt.savefig("condition_accuracy_plot.png")
+            plt.clf()
 
             # Plot training & validation loss values
             plt.plot(history.history['condition_loss'])
@@ -462,6 +465,7 @@ class MainDriver:
             plt.legend(['Train', 'Test'], loc='upper left')
 
             plt.savefig("condition_loss_plot.png")
+            plt.clf()
 
             # temperature
             # Plot training & validation accuracy values
@@ -473,6 +477,7 @@ class MainDriver:
             plt.legend(['Train', 'Test'], loc='upper left')
 
             plt.savefig("temperature_accuracy_plot.png")
+            plt.clf()
 
             # Plot training & validation loss values
             plt.plot(history.history['temp_loss'])
@@ -483,6 +488,7 @@ class MainDriver:
             plt.legend(['Train', 'Test'], loc='upper left')
 
             plt.savefig("temperature_loss_plot.png")
+            plt.clf()
 
             forever_loop = True
 
