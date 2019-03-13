@@ -360,7 +360,7 @@ class MainDriver:
         spring_time = datetime(year=2018, month=6, day=1, hour=0)
 
         net = NeuralNet(100, 100, CHANNELS_MODE)
-        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time, spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=100)
+        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time, spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=500)
 
         model = net.create_model()
 
@@ -388,7 +388,7 @@ class MainDriver:
             print("Validation Size:", rad_validate.shape, class_validate.shape, temp_validate.shape)
 
             # augment the data
-            # rad_features, class_label, temp_label = TFDataManager.augment_data(rad_features, class_label, temp_label)
+            rad_features, class_label, temp_label = TFDataManager.augment_data(rad_features, class_label, temp_label)
 
             # normalize data between 0-1
             rad_features = TFDataManager.normalize_radiance_array(rad_features)
