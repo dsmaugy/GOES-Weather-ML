@@ -4,9 +4,7 @@
     <option name="SCOPE_TYPE" value="3" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="02cf5325-2bb3-446a-a662-5bfec6377796" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/neuralnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/neuralnet.py" afterDir="false" />
-    </list>
+    <list default="true" id="02cf5325-2bb3-446a-a662-5bfec6377796" name="Default Changelist" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,8 +59,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/neuralnet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="345">
-              <caret line="483" column="36" selection-start-line="483" selection-start-column="36" selection-end-line="483" selection-end-column="36" />
+            <state relative-caret-position="-390">
+              <caret line="419" lean-forward="true" selection-start-line="419" selection-end-line="419" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
               </folding>
@@ -502,7 +500,21 @@
       <option name="project" value="LOCAL" />
       <updated>1552477429336</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="fixed plots">
+      <created>1552494992840</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1552494992840</updated>
+    </task>
+    <task id="LOCAL-00028" summary="fixed plots w/ epoch">
+      <created>1552495066846</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1552495066846</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TodoView">
@@ -516,14 +528,13 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="-1" width="1920" height="1054" extended-state="6" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14865577" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3705693" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.3705693" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -548,8 +559,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Commit before first day of data is due&#10;I can grab weather and satellite data from a specific time stamps now. However the weather data grabbing algorithm needs to be optimized with the CSV files&#10;&#10;Once that works, I just need to integrate the two data acquisition methods to give me a series of data that is feedable to the NN. Then feature testing of the NN can begin" />
-    <MESSAGE value="Data grabbing is now optimized, iterator will &quot;remember&quot; where it left off and will not have to loop from the start again" />
     <MESSAGE value="significantly increased speed by storing timezone data into dictionary, finally fixed time stuff and added support for daylight savings" />
     <MESSAGE value="restructured the organization, 3 different classes to interact with the data&#10;&#10;curently working on finalizing the function to convert the data into numpy arrays to feed into TF" />
     <MESSAGE value="first attempt at running on compute engine&#10;data collection should loop and save the numpy arrays" />
@@ -573,7 +582,9 @@
     <MESSAGE value="data eval grabber" />
     <MESSAGE value="added code to save plots" />
     <MESSAGE value="re-enabled augmentation" />
-    <option name="LAST_COMMIT_MESSAGE" value="re-enabled augmentation" />
+    <MESSAGE value="fixed plots" />
+    <MESSAGE value="fixed plots w/ epoch" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixed plots w/ epoch" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -704,8 +715,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/neuralnet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="345">
-          <caret line="483" column="36" selection-start-line="483" selection-start-column="36" selection-end-line="483" selection-end-column="36" />
+        <state relative-caret-position="-390">
+          <caret line="419" lean-forward="true" selection-start-line="419" selection-end-line="419" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
           </folding>

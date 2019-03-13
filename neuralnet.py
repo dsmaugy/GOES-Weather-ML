@@ -420,6 +420,7 @@ class MainDriver:
 
             model.save("model.hd5")
 
+            print(history.history.keys())
             # clouds
             # Plot training & validation accuracy values
             plt.plot(history.history['cloud_acc'])
