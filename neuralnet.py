@@ -424,7 +424,7 @@ class MainDriver:
             # clouds
             # Plot training & validation accuracy values
             plt.plot(history.history['cloud_acc'])
-            plt.plot(history.history['cloud_val_acc'])
+            plt.plot(history.history['val_cloud_acc'])
             plt.title('Cloud Model accuracy')
             plt.ylabel('Accuracy')
             plt.xlabel('Epoch')
