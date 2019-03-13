@@ -434,7 +434,7 @@ class MainDriver:
 
             # Plot training & validation loss values
             plt.plot(history.history['cloud_loss'])
-            plt.plot(history.history['cloud_val_loss'])
+            plt.plot(history.history['val_cloud_loss'])
             plt.title('Cloud Model loss')
             plt.ylabel('Loss')
             plt.xlabel('Epoch')
@@ -445,7 +445,7 @@ class MainDriver:
             # conditions
             # Plot training & validation accuracy values
             plt.plot(history.history['condition_acc'])
-            plt.plot(history.history['condition_val_acc'])
+            plt.plot(history.history['val_condition_acc'])
             plt.title('Condition Model accuracy')
             plt.ylabel('Accuracy')
             plt.xlabel('Epoch')
@@ -455,7 +455,7 @@ class MainDriver:
 
             # Plot training & validation loss values
             plt.plot(history.history['condition_loss'])
-            plt.plot(history.history['condition_val_loss'])
+            plt.plot(history.history['val_condition_loss'])
             plt.title('Condition Model loss')
             plt.ylabel('Loss')
             plt.xlabel('Epoch')
@@ -466,7 +466,7 @@ class MainDriver:
             # temperature
             # Plot training & validation accuracy values
             plt.plot(history.history['temp_acc'])
-            plt.plot(history.history['temp_val_acc'])
+            plt.plot(history.history['val_temp_acc'])
             plt.title('Temperature Model accuracy')
             plt.ylabel('Accuracy')
             plt.xlabel('Epoch')
@@ -476,7 +476,7 @@ class MainDriver:
 
             # Plot training & validation loss values
             plt.plot(history.history['temp_loss'])
-            plt.plot(history.history['temp_val_loss'])
+            plt.plot(history.history['val_temp_loss'])
             plt.title('Temperature Model loss')
             plt.ylabel('Loss')
             plt.xlabel('Epoch')
