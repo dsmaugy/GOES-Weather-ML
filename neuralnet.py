@@ -10,6 +10,7 @@ from math import floor
 import time
 from sklearn.utils import shuffle
 from sys import getsizeof
+import matplotlib.pyplot as plt
 
 PICKLE_MODE = False
 DATE_PICKLE_NAME = "datagrabberdate.pickle"
@@ -305,13 +306,13 @@ class NeuralNet:
         x = layers.Conv2D(filters=128, kernel_size=10, activation="relu", data_format=self.__data_format)(inputs)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
-        x = layers.Dropout(0.2)(x)
+        # x = layers.Dropout(0.2)(x)
         print(x.shape)
 
         x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
-        x = layers.Dropout(0.2)(x)
+        # x = layers.Dropout(0.2)(x)
         print(x.shape)
 
         x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
@@ -359,7 +360,7 @@ class MainDriver:
         spring_time = datetime(year=2018, month=6, day=1, hour=0)
 
         net = NeuralNet(100, 100, CHANNELS_MODE)
-        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time, spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=500)
+        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time, spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=100)
 
         model = net.create_model()
 
@@ -387,7 +388,7 @@ class MainDriver:
             print("Validation Size:", rad_validate.shape, class_validate.shape, temp_validate.shape)
 
             # augment the data
-            rad_features, class_label, temp_label = TFDataManager.augment_data(rad_features, class_label, temp_label)
+            # rad_features, class_label, temp_label = TFDataManager.augment_data(rad_features, class_label, temp_label)
 
             # normalize data between 0-1
             rad_features = TFDataManager.normalize_radiance_array(rad_features)
@@ -414,10 +415,31 @@ class MainDriver:
                        "condition": conditions_validate,
                        "temp": temp_validate}
 
-            model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=10, validation_data=(rad_validate, weather_validation_set)
+            history = model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=1, validation_data=(rad_validate, weather_validation_set)
                       , verbose=1, callbacks=[cp_callback])
 
             model.save("model.hd5")
+
+            # Plot training & validation accuracy values
+            plt.plot(history.history['acc'])
+            plt.plot(history.history['val_acc'])
+            plt.title('Model accuracy')
+            plt.ylabel('Accuracy')
+            plt.xlabel('Epoch')
+            plt.legend(['Train', 'Test'], loc='upper left')
+
+            plt.savefig("accuracy_plot.png")
+
+            # Plot training & validation loss values
+            plt.plot(history.history['loss'])
+            plt.plot(history.history['val_loss'])
+            plt.title('Model loss')
+            plt.ylabel('Loss')
+            plt.xlabel('Epoch')
+            plt.legend(['Train', 'Test'], loc='upper left')
+
+            plt.savefig("loss_plot.png")
+
             forever_loop = True
 
 if __name__ == "__main__":
