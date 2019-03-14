@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.keras import layers
 from tensorflow.keras import regularizers
+import tensorflow.keras as keras
 from datetime import timedelta, datetime
 import numpy as np
 import pickle
@@ -10,7 +11,6 @@ from math import floor
 import time
 from sklearn.utils import shuffle
 from sys import getsizeof
-import matplotlib.pyplot as plt
 
 PICKLE_MODE = False
 DATE_PICKLE_NAME = "datagrabberdate.pickle"
@@ -128,51 +128,7 @@ class TFDataManager:
     def augment_data(rad_array, class_array, temp_array):
         original_size = rad_array.shape[0]
         print("-----------BEGIN DATA AUGMENTATION-------------")
-        print("Before augmentation", class_array.shape)
-
-        rad_of_NCD = []
-        class_of_NCD = []
-        temp_of_NCD = []
-
-        for i in range(len(class_array)):
-            if class_array[i][0] == 0 or np.where(class_array[i][6:10] == 1)[0] > 0:
-                rad_of_NCD.append(rad_array[i])
-                class_of_NCD.append(class_array[i])
-                temp_of_NCD.append(temp_array[i])
-
-        rad_of_NCD = np.array(rad_of_NCD)
-        class_of_NCD = np.array(class_of_NCD)
-        temp_of_NCD = np.array(temp_of_NCD)
-
-        # rot 1
-        rad_of_NCD_augmented = np.concatenate((rad_of_NCD, np.rot90(rad_of_NCD, 2, axes=(2, 3))))
-        class_of_NCD_augmented = np.concatenate((class_of_NCD, class_of_NCD))
-        temp_of_NCD_augmented = np.concatenate((temp_of_NCD, temp_of_NCD))
-
-        rad_of_NCD_augmented = np.concatenate((rad_of_NCD_augmented, np.rot90(rad_of_NCD, 3, axes=(2, 3))))
-        class_of_NCD_augmented = np.concatenate((class_of_NCD_augmented, class_of_NCD))
-        temp_of_NCD_augmented = np.concatenate((temp_of_NCD_augmented, temp_of_NCD))
-
-        print("rad aug shape", rad_of_NCD_augmented.shape)
-
-        rad_noise = np.concatenate((rad_of_NCD_augmented, TFDataManager.add_gaussian_noise(rad_of_NCD_augmented)))
-        rad_noise = np.concatenate((rad_noise, TFDataManager.add_gaussian_noise(rad_of_NCD_augmented, std=0.5)))
-        rad_noise = np.concatenate((rad_noise, TFDataManager.add_gaussian_noise(rad_of_NCD_augmented, std=0.3)))
-
-        print("rad noise shape", rad_noise.shape)
-        print("class shape before repeat", class_of_NCD_augmented.shape)
-        rad_of_NCD_augmented = np.concatenate((rad_of_NCD_augmented, rad_noise))
-
-        class_of_NCD_augmented = np.concatenate((class_of_NCD_augmented, np.repeat(class_of_NCD_augmented, 4, 0)))
-        temp_of_NCD_augmented = np.concatenate((temp_of_NCD_augmented, np.repeat(temp_of_NCD_augmented, 4, 0)))
-
-        print(rad_of_NCD_augmented.shape)
-        print(class_of_NCD_augmented.shape)
-        print(temp_of_NCD_augmented.shape)
-
-        '''
-        End of NCD stuff
-        '''
+        print("Before augmentation", rad_array.shape)
 
         # flip images left-right
         flipped_features = np.flip(rad_array, (2, 3))
@@ -195,12 +151,6 @@ class TFDataManager:
         rad_features_augmented = np.concatenate((rad_features_augmented, noise))
         class_labels_augmented = np.concatenate((class_labels_augmented, class_labels_augmented))
         temp_array_augmented = np.concatenate((temp_array_augmented, temp_array_augmented))
-
-        # combine NCD data augment and normal data augment
-        rad_features_augmented = np.concatenate((rad_features_augmented, rad_of_NCD_augmented))
-        class_labels_augmented = np.concatenate((class_labels_augmented, class_of_NCD_augmented))
-        temp_array_augmented = np.concatenate((temp_array_augmented, temp_of_NCD_augmented))
-
         print("Noise augment rad", rad_features_augmented.shape)
         print("Noise augment class + temp", class_labels_augmented.shape, temp_array_augmented.shape)
 
@@ -245,8 +195,8 @@ class TFDataManager:
 
 
     @staticmethod
-    def add_gaussian_noise(array, std=1.0):
-        return array + np.random.normal(0, std, size=array.shape)
+    def add_gaussian_noise(array):
+        return array + np.random.normal(0, 0.5, size=array.shape)
 
     @staticmethod
     def format_numpy_arrays(array):
@@ -371,7 +321,7 @@ class NeuralNet:
         print(x.shape)
 
         x = layers.Flatten()(x)
-        x = layers.Dense(50, activation="relu")(x)
+        x = layers.Dense(200, activation="relu")(x)
         x = layers.Dropout(0.4)(x)
         print(x.shape)
 
@@ -384,24 +334,25 @@ class NeuralNet:
         x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
-        x = layers.Dropout(0.4)(x)
+        # x = layers.Dropout(0.4)(x)
 
         x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
-        x = layers.Dropout(0.4)(x)
+        # x = layers.Dropout(0.4)(x)
 
         x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
 
         x = layers.Flatten()(x)
+        x = layers.Dense(400, activation="relu", bias_regularizer=regularizers.l2(.15))(x)
+        x = layers.Dropout(0.5)(x)
         x = layers.Dense(300, activation="relu", bias_regularizer=regularizers.l2(.15))(x)
         x = layers.Dropout(0.5)(x)
         x = layers.Dense(201, activation="softmax", name="temp")(x)
 
         return x
-
 
 class MainDriver:
     def train(self):
@@ -411,7 +362,7 @@ class MainDriver:
         spring_time = datetime(year=2018, month=6, day=1, hour=0)
 
         net = NeuralNet(100, 100, CHANNELS_MODE)
-        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time, spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=500)
+        data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time, spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=700)
 
         model = net.create_model()
 
@@ -466,93 +417,24 @@ class MainDriver:
                        "condition": conditions_validate,
                        "temp": temp_validate}
 
-            history = model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=20, validation_data=(rad_validate, weather_validation_set)
+            model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=5, validation_data=(rad_validate, weather_validation_set)
                       , verbose=1, callbacks=[cp_callback])
 
+
             model.save("model.hd5")
-
-            print(history.history.keys())
-
-            self.save_graphs(history)
-
             forever_loop = True
 
-    def save_graphs(self, history):
-        # clouds
-        # Plot training & validation accuracy values
-        plt.plot(history.history['cloud_acc'])
-        plt.plot(history.history['val_cloud_acc'])
-        plt.title('Cloud Model accuracy')
-        plt.ylabel('Accuracy')
-        plt.xlabel('Epoch')
-        plt.legend(['Train', 'Test'], loc='upper left')
-
-        plt.savefig("cloud_accuracy_plot.png")
-        plt.clf()
-
-        # Plot training & validation loss values
-        plt.plot(history.history['cloud_loss'])
-        plt.plot(history.history['val_cloud_loss'])
-        plt.title('Cloud Model loss')
-        plt.ylabel('Loss')
-        plt.xlabel('Epoch')
-        plt.legend(['Train', 'Test'], loc='upper left')
-
-        plt.savefig("cloud_loss_plot.png")
-        plt.clf()
-
-        # conditions
-        # Plot training & validation accuracy values
-        plt.plot(history.history['condition_acc'])
-        plt.plot(history.history['val_condition_acc'])
-        plt.title('Condition Model accuracy')
-        plt.ylabel('Accuracy')
-        plt.xlabel('Epoch')
-        plt.legend(['Train', 'Test'], loc='upper left')
-
-        plt.savefig("condition_accuracy_plot.png")
-        plt.clf()
-
-        # Plot training & validation loss values
-        plt.plot(history.history['condition_loss'])
-        plt.plot(history.history['val_condition_loss'])
-        plt.title('Condition Model loss')
-        plt.ylabel('Loss')
-        plt.xlabel('Epoch')
-        plt.legend(['Train', 'Test'], loc='upper left')
-
-        plt.savefig("condition_loss_plot.png")
-        plt.clf()
-
-        # temperature
-        # Plot training & validation accuracy values
-        plt.plot(history.history['temp_acc'])
-        plt.plot(history.history['val_temp_acc'])
-        plt.title('Temperature Model accuracy')
-        plt.ylabel('Accuracy')
-        plt.xlabel('Epoch')
-        plt.legend(['Train', 'Test'], loc='upper left')
-
-        plt.savefig("temperature_accuracy_plot.png")
-        plt.clf()
-
-        # Plot training & validation loss values
-        plt.plot(history.history['temp_loss'])
-        plt.plot(history.history['val_temp_loss'])
-        plt.title('Temperature Model loss')
-        plt.ylabel('Loss')
-        plt.xlabel('Epoch')
-        plt.legend(['Train', 'Test'], loc='upper left')
-
-        plt.savefig("temperature_loss_plot.png")
-        plt.clf()
 
 if __name__ == "__main__":
     # only if running with GPU
     config = tf.ConfigProto()
     config.gpu_options.allow_growth = True
     tf.Session(config=config)
+    #
+    # main = MainDriver()
+    # main.train()
 
-    main = MainDriver()
-    main.train()
+
+
+
 
