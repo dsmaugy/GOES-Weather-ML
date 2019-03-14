@@ -6,6 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="02cf5325-2bb3-446a-a662-5bfec6377796" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/neuralnet.py" beforeDir="false" afterPath="$PROJECT_DIR$/neuralnet.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -36,8 +37,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/datagrabber.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2220">
-              <caret line="284" column="39" selection-start-line="284" selection-start-column="39" selection-end-line="284" selection-end-column="39" />
+            <state relative-caret-position="311">
+              <caret line="292" column="38" lean-forward="true" selection-start-line="292" selection-start-column="38" selection-end-line="292" selection-end-column="38" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
                 <element signature="e#399#6270#0" />
@@ -61,11 +62,23 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/neuralnet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="540">
-              <caret line="475" lean-forward="true" selection-start-line="475" selection-end-line="475" />
+            <state relative-caret-position="-709">
+              <caret line="413" column="177" selection-start-line="413" selection-start-column="177" selection-end-line="413" selection-end-column="177" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
+                <element signature="e#9206#10146#0" />
+                <element signature="e#10939#15186#0" />
+                <element signature="e#18526#20836#0" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/testing.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="180">
+              <caret line="12" column="41" selection-start-line="12" selection-start-column="41" selection-end-line="12" selection-end-column="41" />
             </state>
           </provider>
         </entry>
@@ -135,6 +148,7 @@
         <option value="$PROJECT_DIR$/datagrabber.py" />
         <option value="$PROJECT_DIR$/.idea/workspace.xml" />
         <option value="$PROJECT_DIR$/evaldatagrabber.py" />
+        <option value="$PROJECT_DIR$/testing.py" />
         <option value="$PROJECT_DIR$/neuralnet.py" />
       </list>
     </option>
@@ -154,6 +168,11 @@
             <path>
               <item name="GOES-Weather-ML" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
               <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+            </path>
+            <path>
+              <item name="GOES-Weather-ML" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+              <item name="NumpyDataFiles" type="9f88c78c:ScopeViewTreeModel$FileNode" />
             </path>
           </expand>
           <select />
@@ -294,15 +313,38 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="testing" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="GOES-Weather-ML" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/testing.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python.Data Grab Test" />
       <item itemvalue="Python.GCS Test" />
       <item itemvalue="Python.neuralnet" />
       <item itemvalue="Python.evaldatagrabber" />
+      <item itemvalue="Python.testing" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.neuralnet" />
+        <item itemvalue="Python.testing" />
         <item itemvalue="Python.evaldatagrabber" />
         <item itemvalue="Python.GCS Test" />
         <item itemvalue="Python.Data Grab Test" />
@@ -537,7 +579,21 @@
       <option name="project" value="LOCAL" />
       <updated>1552499911784</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="clear graphs">
+      <created>1552504845886</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1552504845886</updated>
+    </task>
+    <task id="LOCAL-00033" summary="graphs in separate function">
+      <created>1552510744831</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1552510744831</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TodoView">
@@ -550,15 +606,14 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="-1" width="1920" height="1054" extended-state="7" />
-    <editor active="true" />
+    <frame x="0" y="-1" width="1920" height="1054" extended-state="6" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14865577" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.3705693" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3705693" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -583,8 +638,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixed subscriptable datetime error" />
-    <MESSAGE value="added check if no data for temp or sky" />
     <MESSAGE value="fixed naming numpy files" />
     <MESSAGE value="fixed the check if the cloud type data is weird" />
     <MESSAGE value="added check if radiance file cant be found" />
@@ -608,7 +661,9 @@
     <MESSAGE value="print history" />
     <MESSAGE value="fixed graphs once again" />
     <MESSAGE value="one last time" />
-    <option name="LAST_COMMIT_MESSAGE" value="one last time" />
+    <MESSAGE value="clear graphs" />
+    <MESSAGE value="graphs in separate function" />
+    <option name="LAST_COMMIT_MESSAGE" value="graphs in separate function" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -716,17 +771,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/datagrabber.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2220">
-          <caret line="284" column="39" selection-start-line="284" selection-start-column="39" selection-end-line="284" selection-end-column="39" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#399#6270#0" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/evaldatagrabber.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="795">
@@ -737,12 +781,33 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/datagrabber.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="311">
+          <caret line="292" column="38" lean-forward="true" selection-start-line="292" selection-start-column="38" selection-end-line="292" selection-end-column="38" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#399#6270#0" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/testing.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="12" column="41" selection-start-line="12" selection-start-column="41" selection-end-line="12" selection-end-column="41" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/neuralnet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="540">
-          <caret line="475" lean-forward="true" selection-start-line="475" selection-end-line="475" />
+        <state relative-caret-position="-709">
+          <caret line="413" column="177" selection-start-line="413" selection-start-column="177" selection-end-line="413" selection-end-column="177" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#9206#10146#0" />
+            <element signature="e#10939#15186#0" />
+            <element signature="e#18526#20836#0" />
           </folding>
         </state>
       </provider>
