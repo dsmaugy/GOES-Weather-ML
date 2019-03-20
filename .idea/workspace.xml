@@ -25,7 +25,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gcstools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1785">
+            <state relative-caret-position="503">
               <caret line="116" column="16" selection-start-line="116" selection-start-column="16" selection-end-line="116" selection-end-column="16" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
@@ -37,8 +37,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/datagrabber.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2652">
-              <caret line="292" column="38" selection-start-line="292" selection-start-column="38" selection-end-line="292" selection-end-column="38" />
+            <state relative-caret-position="-248">
+              <caret line="324" column="50" selection-start-line="324" selection-start-column="50" selection-end-line="324" selection-end-column="50" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
                 <element signature="e#399#6270#0" />
@@ -62,10 +62,11 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/neuralnet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="309">
-              <caret line="613" column="29" lean-forward="true" selection-start-line="613" selection-start-column="29" selection-end-line="613" selection-end-column="29" />
+            <state relative-caret-position="-241">
+              <caret line="572" lean-forward="true" selection-start-line="572" selection-end-line="572" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
+                <element signature="e#20271#22683#0" />
               </folding>
             </state>
           </provider>
@@ -82,7 +83,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>maine</find>
       <find>southdak</find>
       <find>south</find>
       <find>southdakota</find>
@@ -112,6 +112,7 @@
       <find>done getting</find>
       <find>augment</find>
       <find>&quot;relu&quot;</find>
+      <find>leaky</find>
     </findStrings>
     <replaceStrings>
       <replace>all_dates[i]</replace>
@@ -143,8 +144,8 @@
     </option>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="1799" />
-    <option name="y" value="-23" />
+    <option name="x" value="1798" />
+    <option name="y" value="-20" />
     <option name="width" value="1696" />
     <option name="height" value="1066" />
   </component>
@@ -153,23 +154,23 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="GOES-Weather-ML" type="b2602c69:ProjectViewProjectNode" />
-              <item name="GOES-Weather-ML" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
       <pane id="Scope">
         <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
           <expand>
             <path>
               <item name="GOES-Weather-ML" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
               <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="GOES-Weather-ML" type="b2602c69:ProjectViewProjectNode" />
+              <item name="GOES-Weather-ML" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -591,7 +592,14 @@
       <option name="project" value="LOCAL" />
       <updated>1552530236571</updated>
     </task>
-    <option name="localTasksCounter" value="35" />
+    <task id="LOCAL-00035" summary="final commit for writeup">
+      <created>1552876280217</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1552876280218</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TodoView">
@@ -612,7 +620,7 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3290461" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.3697749" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.37299034" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -637,7 +645,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fixed the check if the cloud type data is weird" />
     <MESSAGE value="added check if radiance file cant be found" />
     <MESSAGE value="this should actually fix the cloud type data problem" />
     <MESSAGE value="added check if temperature isn't numeric" />
@@ -662,7 +669,8 @@
     <MESSAGE value="clear graphs" />
     <MESSAGE value="graphs in separate function" />
     <MESSAGE value="main computer edits" />
-    <option name="LAST_COMMIT_MESSAGE" value="main computer edits" />
+    <MESSAGE value="final commit for writeup" />
+    <option name="LAST_COMMIT_MESSAGE" value="final commit for writeup" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -771,26 +779,15 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/gcstools.py">
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/keras/utils/vis_utils.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1785">
-          <caret line="116" column="16" selection-start-line="116" selection-start-column="16" selection-end-line="116" selection-end-column="16" />
-          <folding>
-            <element signature="e#0#29#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="289">
+          <caret line="48" selection-start-line="48" selection-end-line="48" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/datagrabber.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2652">
-          <caret line="292" column="38" selection-start-line="292" selection-start-column="38" selection-end-line="292" selection-end-column="38" />
-          <folding>
-            <element signature="e#0#10#0" expanded="true" />
-            <element signature="e#399#6270#0" />
-          </folding>
-        </state>
-      </provider>
+    <entry file="file://$PROJECT_DIR$/model_plot_weird_leak.png">
+      <provider selected="true" editor-type-id="images" />
     </entry>
     <entry file="file://$PROJECT_DIR$/evaldatagrabber.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -802,19 +799,34 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/keras/utils/vis_utils.py">
+    <entry file="file://$PROJECT_DIR$/gcstools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="289">
-          <caret line="48" selection-start-line="48" selection-end-line="48" />
+        <state relative-caret-position="503">
+          <caret line="116" column="16" selection-start-line="116" selection-start-column="16" selection-end-line="116" selection-end-column="16" />
+          <folding>
+            <element signature="e#0#29#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/datagrabber.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-248">
+          <caret line="324" column="50" selection-start-line="324" selection-start-column="50" selection-end-line="324" selection-end-column="50" />
+          <folding>
+            <element signature="e#0#10#0" expanded="true" />
+            <element signature="e#399#6270#0" />
+          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/neuralnet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="309">
-          <caret line="613" column="29" lean-forward="true" selection-start-line="613" selection-start-column="29" selection-end-line="613" selection-end-column="29" />
+        <state relative-caret-position="-241">
+          <caret line="572" lean-forward="true" selection-start-line="572" selection-end-line="572" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
+            <element signature="e#20271#22683#0" />
           </folding>
         </state>
       </provider>
