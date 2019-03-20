@@ -19,6 +19,7 @@ CHANNELS_MODE = "channels_last"
 BATCH_SIZE = 16
 MIN_RAD = 1
 MAX_RAD = 140
+INPUT_PER_EPOCH = 200
 
 '''
 # manager that helps deal with data to in order to directly feed into NN
@@ -404,11 +405,13 @@ class MainDriver:
 
         net = NeuralNet(100, 100, CHANNELS_MODE)
         data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time,
-                                     spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=1000)
+                                     spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=INPUT_PER_EPOCH)
 
         model = net.create_model()
 
         cp_callback = tf.keras.callbacks.ModelCheckpoint("checkpoints/cp.cpkt", verbose=1)
+        tb_callback = tf.keras.callbacks.TensorBoard(log_dir='./logs', histogram_freq=0, batch_size=BATCH_SIZE, write_graph=True,
+                                    write_grads=True, write_images=True)
 
         forever_loop = True
         while forever_loop:
@@ -418,7 +421,7 @@ class MainDriver:
             if rad_features is None:
                 print("End with all pass-throughs of data")
                 data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time,
-                                             spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=1000)
+                                             spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=INPUT_PER_EPOCH)
 
                 rad_features, weather_labels = data_manager.get_numpy_arrays()
 
@@ -432,7 +435,7 @@ class MainDriver:
 
             #TODO see if this fixes validation
             # augment the data
-            rad_features, class_label, temp_label = TFDataManager.augment_data(rad_features, class_label, temp_label)
+            # rad_features, class_label, temp_label = TFDataManager.augment_data(rad_features, class_label, temp_label)
 
             # split up validation data ONLY on non-augmented data
             rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(
@@ -475,7 +478,7 @@ class MainDriver:
 
             history = model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=1,
                                 validation_data=(rad_validate, weather_validation_set)
-                                , verbose=1, callbacks=[cp_callback])
+                                , verbose=1, callbacks=[cp_callback, tb_callback])
 
             print("Iteration complete, saving model...")
             model.save("model.hd5")
@@ -621,8 +624,8 @@ if __name__ == "__main__":
     np.set_printoptions(suppress=True)
 
     main = MainDriver()
-    main.interpret_data()
-    # main.train()
+    # main.interpret_data()
+    main.train()
     # main.plot_model()
     # main.get_model_info()
 
