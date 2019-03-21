@@ -19,7 +19,7 @@ CHANNELS_MODE = "channels_last"
 BATCH_SIZE = 16
 MIN_RAD = 1
 MAX_RAD = 140
-INPUT_PER_EPOCH = 200
+INPUT_PER_EPOCH = 1000
 
 '''
 # manager that helps deal with data to in order to directly feed into NN
@@ -327,7 +327,7 @@ class NeuralNet:
         x = layers.MaxPool2D(pool_size=2)(x)
 
         x = layers.Flatten()(x)
-        x = layers.Dense(320, activation="relu", bias_regularizer=regularizers.l2(.01))(x)
+        x = layers.Dense(320, activation="relu")(x)
         
         # x = layers.Dropout(0.1)(x)
 
@@ -359,7 +359,7 @@ class NeuralNet:
         # print(x.shape)
 
         x = layers.Flatten()(x)
-        x = layers.Dense(100, activation="relu", bias_regularizer=regularizers.l2(0.01))(x)
+        x = layers.Dense(100, activation="relu")(x)
         
         # x = layers.Dropout(0.4)(x)
         print(x.shape)
@@ -389,7 +389,7 @@ class NeuralNet:
         x = layers.MaxPool2D(pool_size=2)(x)
 
         x = layers.Flatten()(x)
-        x = layers.Dense(300, activation="relu", bias_regularizer=regularizers.l2(.05))(x)
+        x = layers.Dense(300, activation="relu")(x)
         # x = layers.Dropout(0.5)(x)
         x = layers.Dense(201, activation="softmax", name="temp")(x)
 
@@ -397,6 +397,25 @@ class NeuralNet:
 
 
 class MainDriver:
+
+    def __init__(self):
+        self.cloud_accuracy = []
+        self.condition_accuracy = []
+        self.temp_accuracy = []
+
+        self.val_cloud_accuracy = []
+        self.val_condition_accuracy = []
+        self.val_temp_accuracy = []
+
+        self.cloud_loss = []
+        self.condition_loss = []
+        self.temp_loss = []
+
+        self.val_cloud_loss = []
+        self.val_condition_loss = []
+        self.val_temp_loss = []
+
+
     def train(self):
         summer_time = datetime(year=2017, month=8, day=1, hour=0)
         fall_time = datetime(year=2017, month=10, day=1, hour=0)
@@ -410,7 +429,7 @@ class MainDriver:
         model = net.create_model()
 
         cp_callback = tf.keras.callbacks.ModelCheckpoint("checkpoints/cp.cpkt", verbose=1)
-        tb_callback = tf.keras.callbacks.TensorBoard(log_dir='./logs', histogram_freq=0, batch_size=BATCH_SIZE, write_graph=True,
+        tb_callback = tf.keras.callbacks.TensorBoard(log_dir='logs', histogram_freq=0, batch_size=BATCH_SIZE, write_graph=True,
                                     write_grads=True, write_images=True)
 
         forever_loop = True
@@ -435,7 +454,7 @@ class MainDriver:
 
             #TODO see if this fixes validation
             # augment the data
-            # rad_features, class_label, temp_label = TFDataManager.augment_data(rad_features, class_label, temp_label)
+            rad_features, class_label, temp_label = TFDataManager.augment_data(rad_features, class_label, temp_label)
 
             # split up validation data ONLY on non-augmented data
             rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(
@@ -484,16 +503,37 @@ class MainDriver:
             model.save("model.hd5")
 
             print(history.history.keys())
+            print(history.history["cloud_categorical_accuracy"])
+            print(self.cloud_accuracy)
 
             self.save_graphs(history)
 
             forever_loop = True
 
     def save_graphs(self, history):
+        self.cloud_accuracy.append(history.history['cloud_categorical_accuracy'][0])
+        self.val_cloud_accuracy.append(history.history['val_cloud_categorical_accuracy'][0])
+
+        self.condition_accuracy.append(history.history['condition_categorical_accuracy'][0])
+        self.val_condition_accuracy.append(history.history['val_condition_categorical_accuracy'][0])
+
+        self.temp_accuracy.append(history.history['temp_categorical_accuracy'][0])
+        self.val_temp_accuracy.append(history.history['val_temp_categorical_accuracy'][0])
+
+        # losses
+        self.cloud_loss.append(history.history['cloud_loss'][0])
+        self.val_cloud_loss.append(history.history['val_cloud_loss'][0])
+
+        self.condition_loss.append(history.history['condition_loss'][0])
+        self.val_condition_loss.append(history.history['val_condition_loss'][0])
+
+        self.temp_loss.append(history.history['temp_loss'][0])
+        self.val_temp_loss.append(history.history['val_temp_loss'][0])
+
         # clouds
         # Plot training & validation accuracy values
-        plt.plot(history.history['cloud_categorical_accuracy'])
-        plt.plot(history.history['val_cloud_categorical_accuracy'])
+        plt.plot(self.cloud_accuracy)
+        plt.plot(self.val_cloud_accuracy)
         plt.title('Cloud Model accuracy')
         plt.ylabel('Accuracy')
         plt.xlabel('Epoch')
@@ -503,8 +543,8 @@ class MainDriver:
         plt.clf()
 
         # Plot training & validation loss values
-        plt.plot(history.history['cloud_loss'])
-        plt.plot(history.history['val_cloud_loss'])
+        plt.plot(self.cloud_loss)
+        plt.plot(self.val_cloud_loss)
         plt.title('Cloud Model loss')
         plt.ylabel('Loss')
         plt.xlabel('Epoch')
@@ -515,8 +555,8 @@ class MainDriver:
 
         # conditions
         # Plot training & validation accuracy values
-        plt.plot(history.history['condition_categorical_accuracy'])
-        plt.plot(history.history['val_condition_categorical_accuracy'])
+        plt.plot(self.condition_accuracy)
+        plt.plot(self.val_condition_accuracy)
         plt.title('Condition Model accuracy')
         plt.ylabel('Accuracy')
         plt.xlabel('Epoch')
@@ -526,8 +566,8 @@ class MainDriver:
         plt.clf()
 
         # Plot training & validation loss values
-        plt.plot(history.history['condition_loss'])
-        plt.plot(history.history['val_condition_loss'])
+        plt.plot(self.condition_loss)
+        plt.plot(self.val_condition_loss)
         plt.title('Condition Model loss')
         plt.ylabel('Loss')
         plt.xlabel('Epoch')
@@ -538,8 +578,8 @@ class MainDriver:
 
         # temperature
         # Plot training & validation accuracy values
-        plt.plot(history.history['temp_categorical_accuracy'])
-        plt.plot(history.history['val_temp_categorical_accuracy'])
+        plt.plot(self.temp_accuracy)
+        plt.plot(self.val_temp_accuracy)
         plt.title('Temperature Model accuracy')
         plt.ylabel('Accuracy')
         plt.xlabel('Epoch')
@@ -549,8 +589,8 @@ class MainDriver:
         plt.clf()
 
         # Plot training & validation loss values
-        plt.plot(history.history['temp_loss'])
-        plt.plot(history.history['val_temp_loss'])
+        plt.plot(self.temp_loss)
+        plt.plot(self.val_temp_loss)
         plt.title('Temperature Model loss')
         plt.ylabel('Loss')
         plt.xlabel('Epoch')
