@@ -25,7 +25,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/gcstools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="503">
+            <state relative-caret-position="1785">
               <caret line="116" column="16" selection-start-line="116" selection-start-column="16" selection-end-line="116" selection-end-column="16" />
               <folding>
                 <element signature="e#0#29#0" expanded="true" />
@@ -37,7 +37,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/datagrabber.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-248">
+            <state relative-caret-position="3196">
               <caret line="324" column="50" selection-start-line="324" selection-start-column="50" selection-end-line="324" selection-end-column="50" />
               <folding>
                 <element signature="e#0#10#0" expanded="true" />
@@ -50,8 +50,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/evaldatagrabber.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="901">
-              <caret line="57" selection-start-line="57" selection-end-line="57" />
+            <state relative-caret-position="1020">
+              <caret line="64" column="105" selection-start-line="64" selection-end-line="65" />
               <folding>
                 <element signature="e#0#43#0" expanded="true" />
               </folding>
@@ -62,11 +62,13 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/neuralnet.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-241">
-              <caret line="572" lean-forward="true" selection-start-line="572" selection-end-line="572" />
+            <state relative-caret-position="-46">
+              <caret line="308" column="13" lean-forward="true" selection-start-line="308" selection-start-column="13" selection-end-line="308" selection-end-column="13" />
               <folding>
                 <element signature="e#0#23#0" expanded="true" />
-                <element signature="e#20271#22683#0" />
+                <element signature="e#1187#4734#0" />
+                <element signature="e#5361#10035#0" />
+                <element signature="e#17897#23457#0" />
               </folding>
             </state>
           </provider>
@@ -83,7 +85,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>southdak</find>
       <find>south</find>
       <find>southdakota</find>
       <find>data_grabber</find>
@@ -113,6 +114,7 @@
       <find>augment</find>
       <find>&quot;relu&quot;</find>
       <find>leaky</find>
+      <find>35</find>
     </findStrings>
     <replaceStrings>
       <replace>all_dates[i]</replace>
@@ -154,23 +156,23 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope">
-        <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
-          <expand>
-            <path>
-              <item name="GOES-Weather-ML" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
-              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
       <pane id="ProjectPane">
         <subPane>
           <expand>
             <path>
               <item name="GOES-Weather-ML" type="b2602c69:ProjectViewProjectNode" />
               <item name="GOES-Weather-ML" type="462c0819:PsiDirectoryNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
+      <pane id="Scope">
+        <subPane subId="Scope 'Project Files'; set:Project Files; class com.intellij.psi.search.scope.ProjectFilesScope">
+          <expand>
+            <path>
+              <item name="GOES-Weather-ML" type="3d21c010:ScopeViewTreeModel$ProjectNode" />
+              <item name="" type="442cc68d:ScopeViewTreeModel$RootNode" />
             </path>
           </expand>
           <select />
@@ -329,8 +331,8 @@
     <list>
       <item itemvalue="Python.Data Grab Test" />
       <item itemvalue="Python.GCS Test" />
-      <item itemvalue="Python.neuralnet" />
       <item itemvalue="Python.evaldatagrabber" />
+      <item itemvalue="Python.neuralnet" />
       <item itemvalue="Python.testing" />
     </list>
     <recent_temporary>
@@ -599,7 +601,21 @@
       <option name="project" value="LOCAL" />
       <updated>1552876280218</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="fixer upper">
+      <created>1553118339852</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1553118339852</updated>
+    </task>
+    <task id="LOCAL-00037" summary="tensorboard + graphing working">
+      <created>1553128092972</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1553128092972</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="TodoView">
@@ -615,12 +631,12 @@
     <frame x="1912" y="-8" width="1696" height="1066" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.14837153" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.16043426" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.3290461" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.37299034" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.37299034" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -645,8 +661,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="added check if radiance file cant be found" />
-    <MESSAGE value="this should actually fix the cloud type data problem" />
     <MESSAGE value="added check if temperature isn't numeric" />
     <MESSAGE value="added additional check" />
     <MESSAGE value="updated date" />
@@ -670,7 +684,9 @@
     <MESSAGE value="graphs in separate function" />
     <MESSAGE value="main computer edits" />
     <MESSAGE value="final commit for writeup" />
-    <option name="LAST_COMMIT_MESSAGE" value="final commit for writeup" />
+    <MESSAGE value="fixer upper" />
+    <MESSAGE value="tensorboard + graphing working" />
+    <option name="LAST_COMMIT_MESSAGE" value="tensorboard + graphing working" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -721,10 +737,8 @@
     <entry file="file://$PROJECT_DIR$/31519-model.hd5" />
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/keras/optimizers.py" />
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/training/adam.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/keras/callbacks.py" />
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/numpy/lib/function_base.py" />
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/keras/layers/core.py" />
-    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/keras/engine/training.py" />
     <entry file="file://$PROJECT_DIR$/.idea/misc.xml">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -760,18 +774,7 @@
     <entry file="file://$PROJECT_DIR$/graphs/before_bed/cloud_accuracy_plot.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/condition_loss_plot.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/condition_accuracy_plot.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cloud_loss_plot.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cloud_accuracy_plot.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/condition_loss_plot.png" />
     <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/keras/activations.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="187">
@@ -789,19 +792,88 @@
     <entry file="file://$PROJECT_DIR$/model_plot_weird_leak.png">
       <provider selected="true" editor-type-id="images" />
     </entry>
-    <entry file="file://$PROJECT_DIR$/evaldatagrabber.py">
+    <entry file="file://$PROJECT_DIR$/cloud_loss_plot.png" />
+    <entry file="file://$PROJECT_DIR$/condition_accuracy_plot.png" />
+    <entry file="file://$PROJECT_DIR$/temperature_accuracy_plot.png" />
+    <entry file="file://$PROJECT_DIR$/cloud_accuracy_plot.png" />
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/keras/engine/network.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="901">
-          <caret line="57" selection-start-line="57" selection-end-line="57" />
+        <state relative-caret-position="-1395">
+          <caret line="65" column="6" selection-start-line="65" selection-start-column="6" selection-end-line="65" selection-end-column="6" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/keras/callbacks.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="85">
+          <caret line="794" selection-start-line="794" selection-end-line="794" />
           <folding>
-            <element signature="e#0#43#0" expanded="true" />
+            <element signature="e#24076#24478#0" />
+            <element signature="e#24514#26952#0" />
+            <element signature="e#26996#27144#0" />
+            <element signature="e#27189#27788#0" />
+            <element signature="e#27840#28389#0" />
+            <element signature="e#28439#29186#0" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/keras/models.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="186">
+          <caret line="32" selection-start-line="32" selection-end-line="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/.PyCharmCE2018.3/system/python_stubs/1080450636/builtins.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="186">
+          <caret line="3608" column="8" selection-start-line="3608" selection-start-column="8" selection-end-line="3608" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/condition_loss_plot-2.png" />
+    <entry file="file://$USER_HOME$/.PyCharmCE2018.3/system/python_stubs/1080450636/numpy/random/mtrand.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="302">
+          <caret line="2211" column="4" selection-start-line="2211" selection-start-column="4" selection-end-line="2211" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/numpy/random/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="449">
+          <caret line="145" column="32" selection-start-line="145" selection-start-column="32" selection-end-line="145" selection-end-column="32" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/keras/metrics/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="6" lean-forward="true" selection-start-line="6" selection-end-line="6" />
+          <folding>
+            <element signature="e#157#194#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/keras/metrics.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-228">
+          <caret line="45" column="4" selection-start-line="45" selection-start-column="4" selection-end-line="45" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$USER_HOME$/AppData/Local/Programs/Python/Python36/Lib/site-packages/tensorflow/python/keras/engine/training.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-630">
+          <caret line="122" column="27" lean-forward="true" selection-start-line="122" selection-start-column="27" selection-end-line="122" selection-end-column="27" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/gcstools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="503">
+        <state relative-caret-position="1785">
           <caret line="116" column="16" selection-start-line="116" selection-start-column="16" selection-end-line="116" selection-end-column="16" />
           <folding>
             <element signature="e#0#29#0" expanded="true" />
@@ -811,7 +883,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/datagrabber.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-248">
+        <state relative-caret-position="3196">
           <caret line="324" column="50" selection-start-line="324" selection-start-column="50" selection-end-line="324" selection-end-column="50" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
@@ -820,13 +892,25 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/evaldatagrabber.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1020">
+          <caret line="64" column="105" selection-start-line="64" selection-end-line="65" />
+          <folding>
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/neuralnet.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-241">
-          <caret line="572" lean-forward="true" selection-start-line="572" selection-end-line="572" />
+        <state relative-caret-position="-46">
+          <caret line="308" column="13" lean-forward="true" selection-start-line="308" selection-start-column="13" selection-end-line="308" selection-end-column="13" />
           <folding>
             <element signature="e#0#23#0" expanded="true" />
-            <element signature="e#20271#22683#0" />
+            <element signature="e#1187#4734#0" />
+            <element signature="e#5361#10035#0" />
+            <element signature="e#17897#23457#0" />
           </folding>
         </state>
       </provider>

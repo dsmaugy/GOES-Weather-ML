@@ -16,10 +16,11 @@ PICKLE_MODE = False
 DATE_PICKLE_NAME = "datagrabberdate.pickle"
 CHANNELS_MODE = "channels_last"
 
-BATCH_SIZE = 16
+BATCH_SIZE = 8
 MIN_RAD = 1
 MAX_RAD = 140
-INPUT_PER_EPOCH = 1000
+INPUT_PER_EPOCH = 1000  # 1000
+CROP_AMNT = 50
 
 '''
 # manager that helps deal with data to in order to directly feed into NN
@@ -146,7 +147,7 @@ class TFDataManager:
             else:
                 weather_condition_check = -1
 
-            if weather_condition_check > 0: # this checks for other cloud conditions: class_array[i][0] == 0 or
+            if weather_condition_check > 0:  # this checks for other cloud conditions: class_array[i][0] == 0 or
                 rad_of_NCD.append(rad_array[i])
                 class_of_NCD.append(class_array[i])
                 temp_of_NCD.append(temp_array[i])
@@ -168,8 +169,8 @@ class TFDataManager:
 
         print("rad aug shape", rad_of_NCD_augmented.shape)
 
-
-        rad_noise = np.concatenate((rad_of_NCD_augmented, TFDataManager.add_gaussian_noise(rad_of_NCD_augmented)))
+        rad_noise = np.concatenate(
+            (rad_of_NCD_augmented, TFDataManager.add_gaussian_noise(rad_of_NCD_augmented, std=0.7)))
         # rad_noise = np.concatenate((rad_noise, TFDataManager.add_gaussian_noise(rad_of_NCD_augmented, std=0.5)))
         # rad_noise = np.concatenate((rad_noise, TFDataManager.add_gaussian_noise(rad_of_NCD_augmented, std=0.3)))
 
@@ -177,13 +178,13 @@ class TFDataManager:
         print("class shape before repeat", class_of_NCD_augmented.shape)
         rad_of_NCD_augmented = np.concatenate((rad_of_NCD_augmented, rad_noise))
 
-        class_of_NCD_augmented = np.concatenate((class_of_NCD_augmented, np.repeat(class_of_NCD_augmented, 2, 0))) # was 4
+        class_of_NCD_augmented = np.concatenate(
+            (class_of_NCD_augmented, np.repeat(class_of_NCD_augmented, 2, 0)))  # was 4
         temp_of_NCD_augmented = np.concatenate((temp_of_NCD_augmented, np.repeat(temp_of_NCD_augmented, 2, 0)))
 
         print(rad_of_NCD_augmented.shape)
         print(class_of_NCD_augmented.shape)
         print(temp_of_NCD_augmented.shape)
-
 
         '''
         End of NCD stuff
@@ -235,28 +236,47 @@ class TFDataManager:
         return np.delete(array, np.s_[:difference], 0)
 
     @staticmethod
+    def __crop_center(img, cropx, cropy):
+        y, x = img.shape
+        startx = x // 2 - (cropx // 2)
+        starty = y // 2 - (cropy // 2)
+        return img[starty:starty + cropy, startx:startx + cropx]
+
+    @staticmethod
+    def crop_arrays(rad_array, size):
+        cropped_arrays = np.zeros((rad_array.shape[0], rad_array.shape[1], size, size))
+        print(cropped_arrays.shape)
+
+        for entry_index in range(rad_array.shape[0]):
+            for channel_index in range(rad_array.shape[1]):
+                cropped_arrays[entry_index, channel_index] = TFDataManager.__crop_center(
+                    rad_array[entry_index, channel_index], size, size)
+
+        return cropped_arrays
+
+    @staticmethod
     def normalize_radiance_array(rad_array):
         for entry_index in range(rad_array.shape[0]):
             for channel_index in range(rad_array.shape[1]):
                 # channel 13
                 if channel_index == 0:
                     rad_array[entry_index, channel_index] = (rad_array[entry_index, channel_index] - -0.4935) / (
-                                183.62 - -0.4935)
+                            183.62 - -0.4935)
 
                 # channel 14
                 elif channel_index == 1:
                     rad_array[entry_index, channel_index] = (rad_array[entry_index, channel_index] - -0.5154) / (
-                                198.71 - -0.5154)
+                            198.71 - -0.5154)
 
                 # channel 15
                 elif channel_index == 2:
                     rad_array[entry_index, channel_index] = (rad_array[entry_index, channel_index] - -0.5262) / (
-                                212.28 - -0.5262)
+                            212.28 - -0.5262)
 
                 # channel 16
                 elif channel_index == 3:
                     rad_array[entry_index, channel_index] = (rad_array[entry_index, channel_index] - -1.5726) / (
-                                170.19 - -1.5726)
+                            170.19 - -1.5726)
 
         return rad_array
 
@@ -302,7 +322,7 @@ class NeuralNet:
                   "temp": "categorical_crossentropy"}
 
         metrics = {"cloud": "categorical_accuracy",
-                   "condition": "categorical_accuracy",
+                   "condition": "accuracy",
                    "temp": "categorical_accuracy"}
 
         tfmodel.compile(optimizer=tf.keras.optimizers.Adam(), metrics=metrics, loss=losses)
@@ -310,25 +330,25 @@ class NeuralNet:
         return tfmodel
 
     def __create_condition_classifier_branch(self, inputs):
-        leaky_RELU = tf.keras.layers.LeakyReLU(alpha=0.01)
+        # leaky_RELU = tf.keras.layers.LeakyReLU(alpha=0.01)
 
-        x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
-        
+        x = layers.Conv2D(filters=64, kernel_size=2, activation="relu", data_format=self.__data_format)(inputs)
+
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
 
-        x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
+        x = layers.Conv2D(filters=64, kernel_size=2, activation="relu", data_format=self.__data_format)(x)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
 
-        x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
-        
+        x = layers.Conv2D(filters=32, kernel_size=2, activation="relu", data_format=self.__data_format)(x)
+
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
 
         x = layers.Flatten()(x)
-        x = layers.Dense(320, activation="relu")(x)
-        
+        x = layers.Dense(100, activation="relu")(x)
+
         # x = layers.Dropout(0.1)(x)
 
         x = layers.Dense(4, activation="sigmoid", name="condition")(x)
@@ -336,31 +356,31 @@ class NeuralNet:
         return x
 
     def __create_cloud_classifier_branch(self, inputs):
-        leaky_RELU = tf.keras.layers.LeakyReLU(alpha=0.01)
+        # leaky_RELU = tf.keras.layers.LeakyReLU(alpha=0.01)
 
         print(inputs.shape)
-        x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
-        
+        x = layers.Conv2D(filters=64, kernel_size=3, activation="relu", data_format=self.__data_format)(inputs)
+
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
         # x = layers.Dropout(0.2)(x)
         print(x.shape)
 
         x = layers.Conv2D(filters=32, kernel_size=2, activation="relu", data_format=self.__data_format)(x)
-        
+
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
         # x = layers.Dropout(0.2)(x)
         print(x.shape)
 
-        x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
+        x = layers.Conv2D(filters=32, kernel_size=2, activation="relu", data_format=self.__data_format)(x)
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
         # print(x.shape)
 
         x = layers.Flatten()(x)
         x = layers.Dense(100, activation="relu")(x)
-        
+
         # x = layers.Dropout(0.4)(x)
         print(x.shape)
 
@@ -370,21 +390,21 @@ class NeuralNet:
         return x
 
     def __create_temperature_branch(self, inputs):
-        leaky_RELU = tf.keras.layers.LeakyReLU(alpha=0.01)
+        # leaky_RELU = tf.keras.layers.LeakyReLU(alpha=0.01)
         x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(inputs)
-        
+
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
         # x = layers.Dropout(0.4)(x)
 
-        x = layers.Conv2D(filters=64, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
-        
+        x = layers.Conv2D(filters=64, kernel_size=2, activation="relu", data_format=self.__data_format)(x)
+
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
         # x = layers.Dropout(0.4)(x)
 
-        x = layers.Conv2D(filters=32, kernel_size=5, activation="relu", data_format=self.__data_format)(x)
-        
+        x = layers.Conv2D(filters=32, kernel_size=2, activation="relu", data_format=self.__data_format)(x)
+
         x = layers.BatchNormalization()(x)
         x = layers.MaxPool2D(pool_size=2)(x)
 
@@ -398,7 +418,7 @@ class NeuralNet:
 
 class MainDriver:
 
-    def __init__(self):
+    def __init__(self, saved_model=None):
         self.cloud_accuracy = []
         self.condition_accuracy = []
         self.temp_accuracy = []
@@ -415,6 +435,7 @@ class MainDriver:
         self.val_condition_loss = []
         self.val_temp_loss = []
 
+        self.saved_model = saved_model
 
     def train(self):
         summer_time = datetime(year=2017, month=8, day=1, hour=0)
@@ -422,17 +443,27 @@ class MainDriver:
         winter_time = datetime(year=2018, month=2, day=1, hour=0)
         spring_time = datetime(year=2018, month=6, day=1, hour=0)
 
-        net = NeuralNet(100, 100, CHANNELS_MODE)
+        net = NeuralNet(CROP_AMNT, CROP_AMNT, CHANNELS_MODE)
         data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time,
-                                     spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=INPUT_PER_EPOCH)
+                                     spring_date=spring_time, data_format=CHANNELS_MODE,
+                                     input_per_epoch=INPUT_PER_EPOCH)
 
-        model = net.create_model()
+        if self.saved_model is None:
+            print("Creating new model...")
+            model = net.create_model()
+        else:
+            print("Loading old model...")
+            model = self.saved_model
 
         cp_callback = tf.keras.callbacks.ModelCheckpoint("checkpoints/cp.cpkt", verbose=1)
-        tb_callback = tf.keras.callbacks.TensorBoard(log_dir='logs', histogram_freq=0, batch_size=BATCH_SIZE, write_graph=True,
-                                    write_grads=True, write_images=True)
+        tb_callback = tf.keras.callbacks.TensorBoard(log_dir='logs/gamma_stretch', histogram_freq=0,
+                                                     batch_size=BATCH_SIZE,
+                                                     write_graph=False,
+                                                     write_grads=False, write_images=False)
 
         forever_loop = True
+        pic_index = 0
+        epoch_index = 0
         while forever_loop:
             rad_features, weather_labels = data_manager.get_numpy_arrays()
 
@@ -440,7 +471,8 @@ class MainDriver:
             if rad_features is None:
                 print("End with all pass-throughs of data")
                 data_manager = TFDataManager(summer_date=summer_time, fall_date=fall_time, winter_date=winter_time,
-                                             spring_date=spring_time, data_format=CHANNELS_MODE, input_per_epoch=INPUT_PER_EPOCH)
+                                             spring_date=spring_time, data_format=CHANNELS_MODE,
+                                             input_per_epoch=INPUT_PER_EPOCH)
 
                 rad_features, weather_labels = data_manager.get_numpy_arrays()
 
@@ -451,24 +483,27 @@ class MainDriver:
 
             print("Class, temp (shape)", class_label.shape, temp_label.shape)
 
-
-            #TODO see if this fixes validation
+            # TODO see if this fixes validation
             # augment the data
             rad_features, class_label, temp_label = TFDataManager.augment_data(rad_features, class_label, temp_label)
 
             # split up validation data ONLY on non-augmented data
-            rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(
-                rad_array=rad_features, classify_array=class_label,
-                temperature_array=temp_label, validate_percent=0.1)
-            print("Validation Size:", rad_validate.shape, class_validate.shape, temp_validate.shape)
+            # rad_features, class_label, temp_label, rad_validate, class_validate, temp_validate = TFDataManager.split_validation_data(
+            #     rad_array=rad_features, classify_array=class_label,
+            #     temperature_array=temp_label, validate_percent=0.1)
+            # print("Validation Size:", rad_validate.shape, class_validate.shape, temp_validate.shape)
 
-            
             # normalize data between 0-1
             rad_features = TFDataManager.normalize_radiance_array(rad_features)
 
+            # crop
+            rad_features = TFDataManager.crop_arrays(rad_features, CROP_AMNT)
+
+            print("After crop shape:", rad_features.shape)
+
             # transpose
             rad_features = rad_features.transpose([0, 2, 3, 1])
-            rad_validate = rad_validate.transpose([0, 2, 3, 1])
+            # rad_validate = rad_validate.transpose([0, 2, 3, 1])
 
             print(rad_features.shape, class_label.shape, temp_label.shape)
             print(rad_features.nbytes / 1000000, class_label.nbytes / 1000000, temp_label.nbytes / 1000000)
@@ -477,27 +512,36 @@ class MainDriver:
             clouds_label = class_label[:, 0:6]
             conditions_label = class_label[:, 6:10]
 
-            clouds_validate = class_validate[:, 0:6]
-            conditions_validate = class_validate[:, 6:10]
+            # clouds_validate = class_validate[:, 0:6]
+            # conditions_validate = class_validate[:, 6:10]
 
             print("Clouds Label Final:", clouds_label.shape)
             print("Conditions Label Final:", conditions_label.shape)
 
-            print("Clouds Validation Final:", clouds_validate.shape)
-            print("Conditions Validation Final:", conditions_validate.shape)
-
+            # print("Clouds Validation Final:", clouds_validate.shape)
+            # print("Conditions Validation Final:", conditions_validate.shape)
+            #
+            # print(conditions_validate)
 
             outputs = {"cloud": clouds_label,
                        "condition": conditions_label,
                        "temp": temp_label}
 
-            weather_validation_set = {"cloud": clouds_validate,
-                                      "condition": conditions_validate,
-                                      "temp": temp_validate}
+            # weather_validation_set = {"cloud": clouds_validate,
+            #                           "condition": conditions_validate,
+            #                           "temp": temp_validate}
 
+            # history = model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=1,
+            #                     validation_data=(rad_validate, weather_validation_set)
+            #                     , verbose=1, callbacks=[cp_callback, tb_callback])
+
+            # gamma stretching
+            rad_features = np.sqrt(rad_features)
+
+            print(rad_features)
             history = model.fit(rad_features, outputs, batch_size=BATCH_SIZE, epochs=1,
-                                validation_data=(rad_validate, weather_validation_set)
-                                , verbose=1, callbacks=[cp_callback, tb_callback])
+                                validation_split=0.1,
+                                verbose=1, callbacks=[cp_callback, tb_callback])
 
             print("Iteration complete, saving model...")
             model.save("model.hd5")
@@ -506,11 +550,19 @@ class MainDriver:
             print(history.history["cloud_categorical_accuracy"])
             print(self.cloud_accuracy)
 
-            self.save_graphs(history)
+            # start a new graph
+            if epoch_index == 50:
+                epoch_index = 0
+                pic_index += 1
+                self.clear_history()
+            else:
+                epoch_index += 1
+
+            # self.save_graphs(history, pic_index)
 
             forever_loop = True
 
-    def save_graphs(self, history):
+    def save_graphs(self, history, pic_index):
         self.cloud_accuracy.append(history.history['cloud_categorical_accuracy'][0])
         self.val_cloud_accuracy.append(history.history['val_cloud_categorical_accuracy'][0])
 
@@ -539,7 +591,7 @@ class MainDriver:
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper left')
 
-        plt.savefig("cloud_accuracy_plot.png")
+        plt.savefig("cloud_accuracy_plot-{:d}.png".format(pic_index))
         plt.clf()
 
         # Plot training & validation loss values
@@ -550,7 +602,7 @@ class MainDriver:
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper left')
 
-        plt.savefig("cloud_loss_plot.png")
+        plt.savefig("cloud_loss_plot-{:d}.png".format(pic_index))
         plt.clf()
 
         # conditions
@@ -562,7 +614,7 @@ class MainDriver:
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper left')
 
-        plt.savefig("condition_accuracy_plot.png")
+        plt.savefig("condition_accuracy_plot-{:d}.png".format(pic_index))
         plt.clf()
 
         # Plot training & validation loss values
@@ -573,7 +625,7 @@ class MainDriver:
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper left')
 
-        plt.savefig("condition_loss_plot.png")
+        plt.savefig("condition_loss_plot-{:d}.png".format(pic_index))
         plt.clf()
 
         # temperature
@@ -585,7 +637,7 @@ class MainDriver:
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper left')
 
-        plt.savefig("temperature_accuracy_plot.png")
+        plt.savefig("temperature_accuracy_plot-{:d}.png".format(pic_index))
         plt.clf()
 
         # Plot training & validation loss values
@@ -596,12 +648,27 @@ class MainDriver:
         plt.xlabel('Epoch')
         plt.legend(['Train', 'Test'], loc='upper left')
 
-        plt.savefig("temperature_loss_plot.png")
+        plt.savefig("temperature_loss_plot-{:d}.png".format(pic_index))
         plt.clf()
 
+    def clear_history(self):
+        self.cloud_accuracy.clear()
+        self.condition_accuracy.clear()
+        self.temp_accuracy.clear()
+
+        self.val_cloud_accuracy.clear()
+        self.val_condition_accuracy.clear()
+        self.val_temp_accuracy.clear()
+
+        self.cloud_loss.clear()
+        self.condition_loss.clear()
+        self.temp_loss.clear()
+
+        self.val_cloud_loss.clear()
+        self.val_condition_loss.clear()
+        self.val_temp_loss.clear()
+
     def interpret_data(self):
-        # model = tf.keras.models.load_model("model_saves/model_with_NCD_aug.hd5")
-        model = tf.keras.models.load_model("model.hd5")
         rad = np.load("rad-eval-to_columbus.npy")
         rad2 = np.load("rad-eval-to_finish.npy")
 
@@ -614,10 +681,14 @@ class MainDriver:
         # rad = np.load("NumpyDataFiles/2017-8-1-15-rad_feature.npy")
         rad = TFDataManager.normalize_radiance_array(rad)
 
+        rad = TFDataManager.crop_arrays(rad, CROP_AMNT)
+
         rad = rad.transpose([0, 2, 3, 1])
 
+        rad = np.sqrt(rad)
+
         print(rad)
-        predictions = model.predict(rad)
+        predictions = self.saved_model.predict(rad)
 
         for i in range(len(predictions)):
             print("Index:", i)
@@ -646,12 +717,10 @@ class MainDriver:
                         print(actual_temp)
 
     def plot_model(self):
-        model = tf.keras.models.load_model("model_saves/model_with_NCD_aug.hd5")
-        tf.keras.utils.plot_model(model, to_file="model_plot.png")
+        tf.keras.utils.plot_model(self.saved_model, to_file="model_plot.png")
 
     def get_model_info(self):
-        model = tf.keras.models.load_model("model.hd5")
-        print(model.get_weights())
+        print(self.saved_model.get_weights())
 
 
 if __name__ == "__main__":
@@ -660,13 +729,13 @@ if __name__ == "__main__":
     config.gpu_options.allow_growth = True
     tf.Session(config=config)
 
-    # supress sci-notation
+    # suppress sci-notation
     np.set_printoptions(suppress=True)
 
-    main = MainDriver()
-    # main.interpret_data()
-    main.train()
+    loaded_model = tf.keras.models.load_model("model_saves/gamma_stretch.hd5")
+    # loaded_model = None
+    main = MainDriver(saved_model=loaded_model)
+    main.interpret_data()
+    # main.train()
     # main.plot_model()
     # main.get_model_info()
-
-
